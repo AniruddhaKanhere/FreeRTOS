@@ -1,0 +1,13 @@
+/*
+ * ThreadSafeWrapper_Queue.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_THREADSAFEWRAPPER_QUEUE_H_
+#define SRC_THREADSAFEWRAPPER_QUEUE_H_
+
+
+
+#endif /* SRC_THREADSAFEWRAPPER_QUEUE_H_ */

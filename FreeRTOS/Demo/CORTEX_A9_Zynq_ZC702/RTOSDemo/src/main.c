@@ -79,6 +79,8 @@
 #include "StreamBufferDemo.h"
 #include "QueueSet.h"
 
+#include "common.h"
+
 /* Xilinx includes. */
 #include "platform.h"
 #include "xparameters.h"
@@ -87,39 +89,10 @@
 #include "xil_exception.h"
 #include "xuartps_hw.h"
 
-/* mainSELECTED_APPLICATION is used to select between three demo applications,
- * as described at the top of this file.
- *
- * When mainSELECTED_APPLICATION is set to 0 the simple blinky example will
- * be run.
- *
- * When mainSELECTED_APPLICATION is set to 1 the comprehensive test and demo
- * application will be run.
- *
- * When mainSELECTED_APPLICATION is set to 2 the lwIP example will be run.
- */
-#define mainSELECTED_APPLICATION	1
-
-/*-----------------------------------------------------------*/
-
 /*
  * Configure the hardware as necessary to run this demo.
  */
 static void prvSetupHardware( void );
-
-/*
- * See the comments at the top of this file and above the
- * mainSELECTED_APPLICATION definition.
- */
-#if ( mainSELECTED_APPLICATION == 0 )
-	extern void main_blinky( void );
-#elif ( mainSELECTED_APPLICATION == 1 )
-	extern void main_full( void );
-#elif ( mainSELECTED_APPLICATION == 2 )
-	extern void main_lwIP( void );
-#else
-	#error Invalid mainSELECTED_APPLICATION setting.  See the comments at the top of this file and above the mainSELECTED_APPLICATION definition.
-#endif
 
 /*
  * The Xilinx projects use a BSP that do not allow the start up code to be
@@ -155,21 +128,20 @@ int main( void )
 	/* Configure the hardware ready to run the demo. */
 	prvSetupHardware();
 
-	/* The mainSELECTED_APPLICATION setting is described at the top	of this
-	file. */
-	#if( mainSELECTED_APPLICATION == 0 )
-	{
-		main_blinky();
-	}
-	#elif( mainSELECTED_APPLICATION == 1 )
-	{
-		main_full();
-	}
-	#else
-	{
-		main_lwIP();
-	}
-	#endif
+	xTaskCreate( ExperimentRunnerTask, "Experiment_runner", 200, NULL, configMAX_PRIORITIES - 1, NULL );
+
+	/* Start the scheduler. */
+	vTaskStartScheduler();
+
+	/* If all is well, the scheduler will now be running, and the following
+	line will never be reached.  If the following line does execute, then
+	there was either insufficient FreeRTOS heap memory available for the idle
+	and/or timer tasks to be created, or vTaskStartScheduler() was called from
+	User mode.  See the memory management section on the FreeRTOS web site for
+	more details on the FreeRTOS heap http://www.freertos.org/a00111.html.  The
+	mode from which main() is called is set in the C start up code and must be
+	a privileged mode (not user mode). */
+	for( ;; );
 
 	/* Don't expect to reach here. */
 	return 0;
@@ -336,7 +308,7 @@ void vApplicationTickHook( void )
 	#endif
 }
 /*-----------------------------------------------------------*/
-
+#if 0
 void *memcpy( void *pvDest, const void *pvSource, size_t xBytes )
 {
 /* The compiler used during development seems to err unless these volatiles are
@@ -394,6 +366,7 @@ volatile size_t x;
 	return xBytes - x;
 }
 /*-----------------------------------------------------------*/
+#endif
 
 void vInitialiseTimerForRunTimeStats( void )
 {

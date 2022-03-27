@@ -1,0 +1,20 @@
+/*
+ * ThreadSafeWrapper_Queue.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+#include "FreeRTOS.h"
+#include "queue.h"
+
+#include "ThreadSafeWrapper_Queue.h"
+
+
+QueueHandle_t ThreadSafeWrapper_QueueInit( UBaseType_t xQueueSize, size_t uxItemSize )
+{
+	QueueHandle_t ThreadSafeQueue;
+
+	ThreadSafeQueue = xQueueCreate( xQueueSize, uxItemSize );
+
+	return ThreadSafeQueue;
+}

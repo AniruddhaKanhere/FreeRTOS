@@ -1,0 +1,173 @@
+/*
+ * ExperimentRunner.c
+ *
+ *  Created on: Mar 24, 2022
+ *      Author: kanherea
+ */
+#include <stdio.h>
+#include "common.h"
+
+#include "ThreadSafeWrapper_Mutex.h"
+#include "ThreadSafeWrapper_Queue.h"
+
+#define USER_TASKS    2
+#define USER_TASK_STACK_DEPTH    100
+
+static TaskHandle_t xUserTaskHandle[ USER_TASKS ];
+static uint32_t ulNumberOfPublishes[ USER_TASKS ];
+
+static void vUserTask( void * args );
+static void vSetUserTaskPriority( UBaseType_t * puxUserTaskPriorities );
+static void vCleanUp( void );
+static BaseType_t RunExperiment( void );
+
+void ExperimentRunnerTask( void * pvArgs )
+{
+    BaseType_t xExperimentStarted;
+    ( void ) pvArgs;
+
+    xExperimentStarted = RunExperiment();
+
+    if( xExperimentStarted == pdPASS )
+    {
+    	vTaskDelay( testEXPERIMENT_RUN_TIME );
+    }
+
+    ulNumberOfPublishes( void );
+
+    while(1);
+}
+
+static BaseType_t RunExperiment( void )
+{
+	BaseType_t xInitSuccess, xTaskCreated, xReturn = pdPASS;
+	char pucTaskName[15];
+	xTaskArgType_t xArgs;
+	UBaseType_t uxUserTaskPriority[ USER_TASKS ];
+
+#if( testUSE_QUEUE == 1 )
+	BaseType_t xQueueSize = testCONFIG_QUEUE_SIZE;
+	UBaseType_t uxAgentStackSize = testCONFIG_AGENT_STACK_SIZE;
+	UBaseType_t uxAgentPriority = testCONFIG_AGENT_PRIORITY;
+
+	xInitSuccess = ThreadSafeWrapper_QueueInit( xQueueSize,
+			                                    uxAgentStackSize,
+			                                    uxAgentPriority );
+#else
+	xInitSuccess = ThreadSafeWrapper_MutexInit();
+#endif
+
+	/* Clear the task handles. */
+	memset( xUserTaskHandle, 0, sizeof( xUserTaskHandle ) );
+
+    xArgs.uxUseBusyWait = testUSE_BUSY_WAIT;
+    xArgs.xUseRandomValues = testUSE_RANDOM_DELAYS;
+    xArgs.uxValueToSend = testLOW_LEVEL_TASK_WAIT;
+    xArgs.uxTaskSendDelay = testMAX_SEND_DELAY;
+
+	if( xInitSuccess == pdPASS )
+	{
+		vSetUserTaskPriority( uxUserTaskPriority );
+
+		for( int i = 0; i < USER_TASKS; i++ )
+		{
+			snprintf( pucTaskName, sizeof( pucTaskName ), "UserTask%d", i );
+
+			xArgs.ulTaskNumber = i;
+
+			xTaskCreated = xTaskCreate( vUserTask,
+						                pucTaskName,
+						                USER_TASK_STACK_DEPTH,
+						                &xArgs,
+						                uxUserTaskPriority[ i ],
+						                &xUserTaskHandle[ i ] );
+			if( xTaskCreated != pdPASS )
+			{
+				/* Return the failure to caller. */
+				xReturn = xTaskCreated;
+				break;
+			}
+		}
+	}
+	else
+	{
+		xReturn = xInitSuccess;
+	}
+
+	if( xReturn != pdPASS )
+	{
+		vCleanUp();
+	}
+
+	return xReturn;
+}
+
+static void vCleanUp( void )
+{
+	/* Clean up user tasks. */
+	for( int i = 0; i < USER_TASKS; i++ )
+	{
+		if( xUserTaskHandle[ i ] != NULL )
+		{
+		    vTaskDelete( xUserTaskHandle[ i ] );
+		}
+	}
+
+	/* Delay so that Idle task can clean up the tasks deleted above.
+	 * It will allow us to delete the mutex/queue. */
+	vTaskDelay( 100 );
+
+	/* Remove the resources used by thread safe APIs. */
+    #if( testUSE_QUEUE == 1 )
+	    ThreadSafeWrapper_QueueDeInit();
+    #else
+	    ThreadSafeWrapper_MutexDeInit();
+    #endif
+
+}
+
+static void vSetUserTaskPriority( UBaseType_t * puxUserTaskPriorities )
+{
+    #if( USER_TASKS != 2 )
+        #error "Number of tasks need to be updated."
+    #endif
+
+	#if( testCONFIG_TEST1 == 1 )
+	    puxUserTaskPriorities[ 0 ] = tskIDLE_PRIORITY;
+	    puxUserTaskPriorities[ 1 ] = tskIDLE_PRIORITY;
+    #elif( testCONFIG_TEST2 == 1 )
+    #elif( testCONFIG_TEST3 == 1 )
+    #elif( testCONFIG_TEST4 == 1 )
+    #elif( testCONFIG_TEST5 == 1 )
+    #endif
+}
+
+static void vUserTask( void * args )
+{
+	xTaskArgType_t *xArgs = ( xTaskArgType_t * ) args;
+    uint32_t ulTaskNumber = xArgs->ulTaskNumber;
+
+    ulNumberOfPublishes[ ulTaskNumber ] = 0;
+
+	while( 1 )
+	{
+        #if( testUSE_QUEUE == 1 )
+            ThreadSafeWrapper_QueueSend( xArgs->uxValueToSend,
+                                         xArgs->uxUseBusyWait,
+                                         xArgs->xUseRandomValues,
+                                         xArgs->uxTaskSendDelay );
+        #else
+            ThreadSafeWrapper_MutexSend( xArgs->uxValueToSend,
+                                         xArgs->uxUseBusyWait,
+                                         xArgs->xUseRandomValues,
+                                         xArgs->uxTaskSendDelay );
+        #endif
+
+        /* Count the number of messages sent by this task. */
+        ulNumberOfPublishes[ ulTaskNumber ]++;
+
+        #if( testCONFIG_USE_DELAYS != 0 )
+            vTaskDelay( pdMS_TO_TICKS( testCONFIG_USE_DELAYS ) );
+        #endif
+	}
+}

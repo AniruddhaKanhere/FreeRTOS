@@ -1,0 +1,48 @@
+/*
+ * ThreadSafeWrapper_Queue.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
+
+#include "ThreadSafeWrapper_Queue.h"
+#include "NonThreadSafeAPI.h"
+
+QueueHandle_t ThreadSafeQueue = NULL;
+TaskHandle_t xAgentTaskHandle = NULL;
+
+BaseType_t ThreadSafeWrapper_QueueInit( UBaseType_t xQueueSize, size_t uxItemSize, size_t uxAgentStackSize, UBaseType_t uxAgentPriority )
+{
+    BaseType_t xReturn = pdFAIL, xAgentTaskCreated;
+
+	ThreadSafeQueue = xQueueCreate( xQueueSize, uxItemSize );
+
+	if( ThreadSafeQueue != NULL )
+	{
+		xAgentTaskCreated = xTaskCreate( vAgentTask, "AgentTask", uxAgentStackSize, NULL, uxAgentPriority, xAgentTaskHandle );
+
+		if( xAgentTaskCreated != pdFAIL )
+		{
+			xReturn = pdPASS;
+		}
+	}
+
+	return xReturn;
+}
+
+BaseType_t ThreadSafeWrapper_QueueSend( UBaseType_t uxValueToSend, TickType_t uxUseTimeout )
+{
+	BaseType_t xReturn;
+
+	xReturn = xQueueSendToBack( ThreadSafeQueue, &uxValueToSend, uxTimeout );
+
+	return xReturn;
+}
+
+void vAgentTask( void * vArgs )
+{
+
+}

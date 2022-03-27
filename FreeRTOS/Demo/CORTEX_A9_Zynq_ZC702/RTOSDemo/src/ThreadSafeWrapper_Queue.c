@@ -1,0 +1,124 @@
+/*
+ * ThreadSafeWrapper_Queue.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
+
+#include "ThreadSafeWrapper_Queue.h"
+#include "NonThreadSafeAPI.h"
+
+static QueueHandle_t ThreadSafeQueue = NULL;
+static TaskHandle_t xAgentTaskHandle = NULL;
+static BaseType_t xAgentInitSuccess = pdFALSE;
+
+static void vAgentTask( void * vArgs );
+
+typedef struct xMessage
+{
+    UBaseType_t uxCount;
+    UBaseType_t uxUseBusyWait;
+    BaseType_t xUseRandomValues;
+} xMessageType_t;
+
+BaseType_t ThreadSafeWrapper_QueueInit( UBaseType_t xQueueSize,
+										size_t uxAgentStackSize,
+										UBaseType_t uxAgentPriority )
+{
+    BaseType_t xReturn = pdFAIL, xAgentTaskCreated;
+
+    configASSERT( xAgentInitSuccess == pdFALSE );
+
+    if( xAgentInitSuccess == pdFALSE )
+    {
+	    ThreadSafeQueue = xQueueCreate( xQueueSize, sizeof( xMessageType_t ) );
+
+	    if( ThreadSafeQueue != NULL )
+	    {
+		    xAgentTaskCreated = xTaskCreate( vAgentTask,
+			    	                         "AgentTask",
+				    						 uxAgentStackSize,
+					    					 NULL,
+						    				 uxAgentPriority,
+							    			 &xAgentTaskHandle );
+
+		    if( xAgentTaskCreated != pdFAIL )
+		    {
+			    xReturn = pdPASS;
+			    xAgentInitSuccess = pdTRUE;
+		    }
+	    }
+    }
+
+	return xReturn;
+}
+
+BaseType_t ThreadSafeWrapper_QueueSend( UBaseType_t uxValueToSend,
+		                                UBaseType_t uxUseBusyWait,
+		                                BaseType_t xUseRandomValues,
+		                                TickType_t uxTimeout )
+{
+	BaseType_t xReturn;
+	xMessageType_t xMessage;
+
+	configASSERT( ThreadSafeQueue != NULL );
+	configASSERT( xAgentInitSuccess != pdFALSE );
+
+	xMessage.uxCount = uxValueToSend;
+	xMessage.uxUseBusyWait = uxUseBusyWait;
+	xMessage.xUseRandomValues = xUseRandomValues;
+
+	xReturn = xQueueSendToBack( ThreadSafeQueue, &xMessage, uxTimeout );
+
+	return xReturn;
+}
+
+static void vAgentTask( void * vArgs )
+{
+	xMessageType_t xMessageRecvd;
+
+	/* Suppress compiler warnings. */
+	( void ) vArgs;
+
+	configASSERT( ThreadSafeQueue != NULL );
+
+	if( ThreadSafeQueue != NULL )
+	{
+        while( 1 )
+        {
+        	if( xQueueReceive( ThreadSafeQueue,
+        			           ( void * ) &xMessageRecvd,
+							   portMAX_DELAY ) == pdTRUE )
+        	{
+        		NonThreadSafeAPI( xMessageRecvd.uxCount,
+        				          xMessageRecvd.uxUseBusyWait,
+								  xMessageRecvd.xUseRandomValues );
+        	}
+        	else
+        	{
+        		/* With maximum delay, the queue receive should never fail. */
+        		configASSERT( 0 );
+        	}
+        }
+	}
+
+	/* Delete the task in case the Queue is not created. */
+	vTaskDelete( NULL );
+}
+
+void ThreadSafeWrapper_QueueDeInit( void )
+{
+	configASSERT( xAgentInitSuccess != pdFALSE );
+
+	if( xAgentInitSuccess != pdFALSE )
+	{
+        vTaskDelete( xAgentTaskHandle );
+
+        vQueueDelete( ThreadSafeQueue );
+
+        xAgentInitSuccess = pdFALSE;
+	}
+}

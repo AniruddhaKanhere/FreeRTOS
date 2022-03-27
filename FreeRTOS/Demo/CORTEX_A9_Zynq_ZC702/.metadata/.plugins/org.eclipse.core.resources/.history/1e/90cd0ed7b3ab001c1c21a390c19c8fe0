@@ -1,0 +1,64 @@
+/*
+ * ExperimentRunner.c
+ *
+ *  Created on: Mar 24, 2022
+ *      Author: kanherea
+ */
+#include <stdio.h>
+#include "common.h"
+
+#include "ThreadSafeWrapper_Mutex.h"
+#include "ThreadSafeWrapper_Queue.h"
+
+#define USER_TASKS    2
+#define USER_TASK_STACK_DEPTH    100
+
+void vUserTask( void * args );
+void vSetUserTaskPriority( UBaseType_t * puxUserTaskPriorities );
+
+void RunExperiment( void )
+{
+	BaseType_t xInitSuccess;
+	char pucTaskName[15];
+	xTaskArgType_t xArgs;
+	TaskHandle_t xUserTaskHandle[ USER_TASKS ];
+	UBaseType_t uxUserTaskPriority[ USER_TASKS ];
+
+#if( testUSE_QUEUE == 1 )
+	xInitSuccess = ThreadSafeWrapper_QueueInit();
+#else
+	xInitSuccess = ThreadSafeWrapper_MutexInit();
+#endif
+
+	if( xInitSuccess == pdTRUE )
+	{
+		for( int i = 0; i < USER_TASKS; i++ )
+		{
+			snprintf( pucTaskName, sizeof( pucTaskName ), "UserTask%d", i );
+
+			xArgs.uxUseBusyWait = testUSE_BUSY_WAIT;
+			xArgs.xUseRandomValues = testUSE_RANDOM_DELAYS;
+			xArgs.uxValueToSend = testMAX_SEND_DELAY;
+
+			uxUserTaskPriority[ i ] = 1;
+
+			xTaskCreate( vUserTask,
+						 pucTaskName,
+						 USER_TASK_STACK_DEPTH,
+						 &xArgs,
+						 uxUserTaskPriority[ i ],
+						 &xUserTaskHandle[ i ] );
+		}
+	}
+}
+
+
+void vSetUserTaskPriority( UBaseType_t * puxUserTaskPriorities )
+{
+	/**/
+}
+
+void vUserTask( void * args )
+{
+    ( void ) args;
+}

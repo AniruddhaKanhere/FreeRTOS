@@ -1,0 +1,33 @@
+/*
+ * ThreadSafeWrapper_Mutex.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+#include "NonThreadSafeAPI.h"
+#include "ThreadSafeWrapper_Mutex.h"
+
+SemaphoreHandle_t ThreadSafeMutex = NULL;
+
+BaseType_t ThreadSafeWrapper_MutexInit( void )
+{
+	BaseType_t xReturn = pdFAIL;
+
+	ThreadSafeMutex = xSemaphoreCreateMutex();
+
+	if( ThreadSafeMutex != NULL )
+	{
+		xReturn = pdPASS;
+	}
+
+	return xReturn;
+}
+
+BaseType_t ThreadSafeWrapper_MutexSend( UBaseType_t uxValueToSend,
+		                                UBaseType_t uxUseBusyWait,
+		                                BaseType_t xUseRandomValues,
+		                                TickType_t uxTimeout );

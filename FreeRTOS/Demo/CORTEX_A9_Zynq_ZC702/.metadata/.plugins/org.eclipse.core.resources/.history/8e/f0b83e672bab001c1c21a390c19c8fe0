@@ -1,0 +1,16 @@
+/*
+ * NonThreadSafeAPI.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#include "NonThreadSafeAPI.h"
+#include "FreeRTOS.h"
+
+void NonThreadSafeAPI( UBaseType_t uxCount )
+{
+	vTaskDelay( pdMS_TO_TICKS( uxCount ) );
+
+	for( BaseType_t i = 0; i < uxCount; i++ );
+}

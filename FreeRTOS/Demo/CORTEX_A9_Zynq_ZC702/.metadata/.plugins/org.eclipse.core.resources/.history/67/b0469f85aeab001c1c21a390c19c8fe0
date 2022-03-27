@@ -1,0 +1,16 @@
+/*
+ * common.h
+ *
+ *  Created on: Mar 24, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_COMMON_H_
+#define SRC_COMMON_H_
+
+typedef xTaskArgs
+{
+	int a;
+}xTaskArgType_t;
+
+#endif /* SRC_COMMON_H_ */

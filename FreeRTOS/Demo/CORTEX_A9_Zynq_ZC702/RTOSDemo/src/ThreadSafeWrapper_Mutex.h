@@ -1,0 +1,23 @@
+/*
+ * ThreadSafeWrapper_Mutex.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_THREADSAFEWRAPPER_MUTEX_H_
+#define SRC_THREADSAFEWRAPPER_MUTEX_H_
+
+#include "FreeRTOS.h"
+#include "queue.h"
+
+BaseType_t ThreadSafeWrapper_MutexInit( void );
+
+BaseType_t ThreadSafeWrapper_MutexSend( UBaseType_t uxValueToSend,
+		                                UBaseType_t uxUseBusyWait,
+		                                BaseType_t xUseRandomValues,
+		                                TickType_t uxTimeout );
+
+void ThreadSafeWrapper_MutexDeInit( void );
+
+#endif /* SRC_THREADSAFEWRAPPER_MUTEX_H_ */

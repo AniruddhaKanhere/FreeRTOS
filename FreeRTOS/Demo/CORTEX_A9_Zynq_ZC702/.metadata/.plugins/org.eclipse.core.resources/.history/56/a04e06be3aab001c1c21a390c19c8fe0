@@ -1,0 +1,14 @@
+/*
+ * ThreadSafeWrapper_Mutex.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_THREADSAFEWRAPPER_MUTEX_H_
+#define SRC_THREADSAFEWRAPPER_MUTEX_H_
+
+#include "FreeRTOS.h"
+#include "queue.h"
+
+#endif /* SRC_THREADSAFEWRAPPER_MUTEX_H_ */

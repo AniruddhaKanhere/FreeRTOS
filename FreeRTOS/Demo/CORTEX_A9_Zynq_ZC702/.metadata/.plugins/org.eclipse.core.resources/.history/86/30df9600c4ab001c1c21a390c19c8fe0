@@ -1,0 +1,34 @@
+/*
+ * common.h
+ *
+ *  Created on: Mar 24, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_COMMON_H_
+#define SRC_COMMON_H_
+
+#include "FreeRTOS.h"
+
+#define testUSE_BUSY_WAIT      1
+#define testUSE_RANDOM_DELAYS  0
+#define testUSE_QUEUE          0
+#define testMAX_SEND_DELAY     portMAX_DELAY
+#define testLOW_LEVEL_TASK_WAIT ( 100 )
+
+/* Test configuration macros. */
+#define testCONFIG_TEST1              ( 1 )
+#define testCONFIG_QUEUE_SIZE         ( 100 )
+#define testCONFIG_AGENT_STACK_SIZE   ( 500 )
+#define testCONFIG_AGENT_PRIORITY     ( tskIDLE_PRIORITY )
+
+typedef struct xTaskArgs
+{
+	UBaseType_t uxValueToSend;    /* The time the the non-thread safe tasks needs to wait. */
+	UBaseType_t uxUseBusyWait;    /* Should the non-thread safe task use busy wait or not. */
+    BaseType_t xUseRandomValues;  /* Are random delays to be used instead of uxValueToSend. */
+    UBaseType_t uxTaskSendDelay;  /* Maximum time a user task should wait for the thread safe
+                                   * API to be available. */
+}xTaskArgType_t;
+
+#endif /* SRC_COMMON_H_ */

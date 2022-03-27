@@ -1,0 +1,16 @@
+18:09:17 INFO  : Registering command handlers for SDK TCF services
+18:09:19 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\kanherea\Desktop\Incremental_changes\MutexQueue\FreeRTOS\Demo\CORTEX_A9_Zynq_ZC702\temp_xsdb_launch_script.tcl
+18:09:25 INFO  : XSCT server has started successfully.
+18:09:27 INFO  : Successfully done setting XSCT server connection channel  
+18:09:27 INFO  : Successfully done setting SDK workspace  
+18:11:38 ERROR : The Hardware Project referenced by this BSP (RTOSDemo_bsp) was not found in this workspace. As a result, this BSP will not build properly. To fix this error, please import the associated hardware project or recreate a new BSP targeting an existing hardware platform.
+18:35:23 INFO  : Registering command handlers for SDK TCF services
+18:35:24 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\kanherea\Desktop\Incremental_changes\MutexQueue\FreeRTOS\Demo\CORTEX_A9_Zynq_ZC702\temp_xsdb_launch_script.tcl
+18:35:31 INFO  : XSCT server has started successfully.
+18:35:31 INFO  : Successfully done setting XSCT server connection channel  
+18:35:31 INFO  : Successfully done setting SDK workspace  
+18:45:25 INFO  : Registering command handlers for SDK TCF services
+18:45:27 INFO  : Launching XSCT server: xsct.bat -interactive C:\Users\kanherea\Desktop\Incremental_changes\MutexQueue\FreeRTOS\Demo\CORTEX_A9_Zynq_ZC702\temp_xsdb_launch_script.tcl
+18:45:33 INFO  : XSCT server has started successfully.
+18:45:33 INFO  : Successfully done setting XSCT server connection channel  
+18:45:34 INFO  : Successfully done setting SDK workspace  

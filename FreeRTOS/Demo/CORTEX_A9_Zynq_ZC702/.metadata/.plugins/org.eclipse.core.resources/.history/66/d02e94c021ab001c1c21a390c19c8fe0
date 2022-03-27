@@ -1,0 +1,31 @@
+/*
+ * ThreadSafeWrapper_Queue.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+#include "FreeRTOS.h"
+#include "queue.h"
+
+#include "ThreadSafeWrapper_Queue.h"
+#include "NonThreadSafeAPI.h"
+
+QueueHandle_t ThreadSafeQueue = NULL;
+
+BaseType_t ThreadSafeWrapper_QueueInit( UBaseType_t xQueueSize, size_t uxItemSize )
+{
+    BaseType_t xReturn = pdPASS;
+
+	ThreadSafeQueue = xQueueCreate( xQueueSize, uxItemSize );
+
+	return xReturn;
+}
+
+BaseType_t ThreadSafeWrapper_QueueSend( UBaseType_t uxValueToSend, TickType_t uxUseTimeout )
+{
+	BaseType_t xReturn;
+
+	xReturn = xQueueSendToBack( ThreadSafeQueue, &uxValueToSend, uxTimeout );
+
+	return xReturn;
+}

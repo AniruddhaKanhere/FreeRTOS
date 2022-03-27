@@ -1,0 +1,22 @@
+/*
+ * ThreadSafeWrapper_Queue.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_THREADSAFEWRAPPER_QUEUE_H_
+#define SRC_THREADSAFEWRAPPER_QUEUE_H_
+
+#include "FreeRTOS.h"
+
+BaseType_t ThreadSafeWrapper_QueueInit( UBaseType_t xQueueSize,
+		                                size_t uxItemSize,
+										size_t uxAgentStackSize,
+										UBaseType_t uxAgentPriority,
+										BaseType_t xConfigBusyWait );
+
+BaseType_t ThreadSafeWrapper_QueueSend( UBaseType_t uxValueToSend,
+		                                TickType_t uxTimeout );
+
+#endif /* SRC_THREADSAFEWRAPPER_QUEUE_H_ */

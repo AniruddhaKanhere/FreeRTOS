@@ -1,0 +1,33 @@
+/*
+ * ExperimentRunner.c
+ *
+ *  Created on: Mar 24, 2022
+ *      Author: kanherea
+ */
+
+#include "ThreadSafeWrapper_Mutex.h"
+#include "ThreadSafeWrapper_Queue.h"
+
+#define USER_TASKS    2
+
+void vUserTask( void * args );
+
+void RunExperiment( void )
+{
+	BaseType_t xInitSuccess;
+#if( USE_QUEUE == 1 )
+	xInitSuccess = ThreadSafeWrapper_QueueInit();
+#else
+	xInitSuccess = ThreadSafeWrapper_MutexInit();
+#endif
+
+	for( int i = 0; i < USER_TASKS; i++ )
+    {
+        xTaskCreate( vUserTask );
+    }
+}
+
+void vUserTask( void * args )
+{
+
+}

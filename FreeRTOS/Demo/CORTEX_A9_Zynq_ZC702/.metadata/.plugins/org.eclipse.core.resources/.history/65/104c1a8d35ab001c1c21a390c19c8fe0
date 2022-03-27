@@ -1,0 +1,13 @@
+/*
+ * ThreadSafeWrapper_Mutex.c
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#include "FreeRTOS.h"
+#include "queue.h"
+
+#include "NonThreadSafeAPI.h"
+#include "ThreadSafeWrapper_Mutex.h"
+

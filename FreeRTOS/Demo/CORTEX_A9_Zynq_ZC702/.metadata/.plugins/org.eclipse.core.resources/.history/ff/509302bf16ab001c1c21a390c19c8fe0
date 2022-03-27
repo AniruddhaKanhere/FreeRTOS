@@ -1,0 +1,13 @@
+/*
+ * NonThreadSafeAPI.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_NONTHREADSAFEAPI_H_
+#define SRC_NONTHREADSAFEAPI_H_
+
+
+
+#endif /* SRC_NONTHREADSAFEAPI_H_ */

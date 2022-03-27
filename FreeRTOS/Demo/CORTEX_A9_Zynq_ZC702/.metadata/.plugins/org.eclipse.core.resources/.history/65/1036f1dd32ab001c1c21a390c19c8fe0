@@ -1,0 +1,22 @@
+/*
+ * NonThreadSafeAPI.h
+ *
+ *  Created on: Mar 23, 2022
+ *      Author: kanherea
+ */
+
+#ifndef SRC_NONTHREADSAFEAPI_H_
+#define SRC_NONTHREADSAFEAPI_H_
+
+#include "FreeRTOS.h"
+
+/*
+ * @brief This is a non thread-safe API. It delays for
+ *        uxCount milliseconds or counts up to that value
+ *        in a busy loop.
+ *
+ * @param uxCount
+ */
+void NonThreadSafeAPI( UBaseType_t uxCount, UBaseType_t uxUseBusyWait );
+
+#endif /* SRC_NONTHREADSAFEAPI_H_ */
