@@ -213,6 +213,11 @@
 #define mqttexampleTRANSPORT_SEND_RECV_TIMEOUT_MS         ( 200U )
 
 /**
+ * @brief Incoming and outgoing publish array count.
+ */
+#define mqttexamplePUBLISH_STATE_ARRAY_COUNT          ( 10 )
+
+/**
  * Provide default values for undefined configuration settings.
  */
 #ifndef democonfigOS_NAME
@@ -294,7 +299,11 @@ static TlsTransportStatus_t prvConnectToServerWithBackoffRetries( NetworkCredent
  * @param[in] xNetworkContext Network context.
  */
 static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
-                                               NetworkContext_t * pxNetworkContext );
+                                               NetworkContext_t * pxNetworkContext,
+                                               MQTTPubAckInfo_t * pIncomingPublishArray,
+                                               size_t uxIncomingPublishStateArrayCount,
+                                               MQTTPubAckInfo_t * pOutgoingPublishArray,
+                                               size_t uxOutgoingPublishStateArrayCount );
 
 /**
  * @brief Function to update variable #xTopicFilterContext with status
@@ -478,6 +487,10 @@ static void prvMQTTDemoTask( void * pvParameters )
     MQTTContext_t xMQTTContext = { 0 };
     MQTTStatus_t xMQTTStatus;
     TlsTransportStatus_t xNetworkStatus;
+    MQTTPubAckInfo_t pxIncomingPublishState[ mqttexamplePUBLISH_STATE_ARRAY_COUNT ];
+    MQTTPubAckInfo_t pxOutgoingPublishState[ mqttexamplePUBLISH_STATE_ARRAY_COUNT ];
+    TimeOut_t xTimeOut;
+    TickType_t xTicksToWait = pdMS_TO_TICKS( mqttexamplePROCESS_LOOP_TIMEOUT_MS );
 
     /* Remove compiler warnings about unused parameters. */
     ( void ) pvParameters;
@@ -508,7 +521,12 @@ static void prvMQTTDemoTask( void * pvParameters )
         /* Sends an MQTT Connect packet over the already established TLS connection,
          * and waits for connection acknowledgment (CONNACK) packet. */
         LogInfo( ( "Creating an MQTT connection to %s.\r\n", democonfigMQTT_BROKER_ENDPOINT ) );
-        prvCreateMQTTConnectionWithBroker( &xMQTTContext, &xNetworkContext );
+        prvCreateMQTTConnectionWithBroker( &xMQTTContext,
+                                           &xNetworkContext,
+                                           pxIncomingPublishState,
+                                           mqttexamplePUBLISH_STATE_ARRAY_COUNT, 
+                                           pxOutgoingPublishState,
+                                           mqttexamplePUBLISH_STATE_ARRAY_COUNT );
 
         /**************************** Subscribe. ******************************/
 
@@ -528,8 +546,22 @@ static void prvMQTTDemoTask( void * pvParameters )
              * same topic, the broker will send publish message back to the
              * application. */
             LogInfo( ( "Attempt to receive publish message from broker.\r\n" ) );
-            xMQTTStatus = MQTT_ProcessLoop( &xMQTTContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS );
-            configASSERT( xMQTTStatus == MQTTSuccess );
+
+            vTaskSetTimeOutState( &xTimeOut );
+            xMQTTStatus = MQTTSuccess;
+            xTicksToWait = pdMS_TO_TICKS( mqttexamplePROCESS_LOOP_TIMEOUT_MS );
+            while( ( xMQTTStatus == MQTTSuccess ) || ( xMQTTStatus == MQTTNeedMoreBytes ) )
+            {
+                xMQTTStatus = MQTT_ProcessLoop( &xMQTTContext );
+
+                if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) != pdFALSE )
+                {
+                    /* Timed out before the wanted number of bytes were available, exit the
+                     * loop. */
+                    break;
+                }
+            }
+            configASSERT( ( xMQTTStatus == MQTTSuccess ) || ( xMQTTStatus == MQTTNeedMoreBytes ) );
 
             /* Leave Connection Idle for some time. */
             LogInfo( ( "Keeping Connection Idle...\r\n\r\n" ) );
@@ -541,8 +573,21 @@ static void prvMQTTDemoTask( void * pvParameters )
         prvMQTTUnsubscribeFromTopic( &xMQTTContext );
 
         /* Process incoming UNSUBACK packet from the broker. */
-        xMQTTStatus = MQTT_ProcessLoop( &xMQTTContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS );
-        configASSERT( xMQTTStatus == MQTTSuccess );
+        vTaskSetTimeOutState( &xTimeOut );
+        xMQTTStatus = MQTTSuccess;
+        xTicksToWait = pdMS_TO_TICKS( mqttexamplePROCESS_LOOP_TIMEOUT_MS );
+        while( ( xMQTTStatus == MQTTSuccess ) || ( xMQTTStatus == MQTTNeedMoreBytes ) )
+        {
+            xMQTTStatus = MQTT_ProcessLoop( &xMQTTContext );
+
+            if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) != pdFALSE )
+            {
+                /* Timed out before the wanted number of bytes were available, exit the
+                 * loop. */
+                break;
+            }
+        }
+        configASSERT( ( xMQTTStatus == MQTTSuccess ) || ( xMQTTStatus == MQTTNeedMoreBytes ) );
 
         /**************************** Disconnect. *****************************/
 
@@ -686,7 +731,11 @@ static TlsTransportStatus_t prvConnectToServerWithBackoffRetries( NetworkCredent
 /*-----------------------------------------------------------*/
 
 static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
-                                               NetworkContext_t * pxNetworkContext )
+                                               NetworkContext_t * pxNetworkContext,
+                                               MQTTPubAckInfo_t * pIncomingPublishArray,
+                                               size_t uxIncomingPublishStateArrayCount,
+                                               MQTTPubAckInfo_t * pOutgoingPublishArray,
+                                               size_t uxOutgoingPublishStateArrayCount )
 {
     MQTTStatus_t xResult;
     MQTTConnectInfo_t xConnectInfo;
@@ -702,9 +751,17 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
     xTransport.pNetworkContext = pxNetworkContext;
     xTransport.send = TLS_FreeRTOS_send;
     xTransport.recv = TLS_FreeRTOS_recv;
+    xTransport.writev = NULL;
 
     /* Initialize MQTT library. */
     xResult = MQTT_Init( pxMQTTContext, &xTransport, prvGetTimeMs, prvEventCallback, &xBuffer );
+    configASSERT( xResult == MQTTSuccess );
+
+    xResult = MQTT_InitStatefulQoS( pxMQTTContext,
+                                    pOutgoingPublishArray,
+                                    uxOutgoingPublishStateArrayCount,
+                                    pIncomingPublishArray,
+                                    uxIncomingPublishStateArrayCount );
     configASSERT( xResult == MQTTSuccess );
 
     /* Some fields are not used in this demo so start with everything at 0. */
@@ -797,6 +854,8 @@ static void prvMQTTSubscribeWithBackoffRetries( MQTTContext_t * pxMQTTContext )
     MQTTSubscribeInfo_t xMQTTSubscription[ mqttexampleTOPIC_COUNT ];
     bool xFailedSubscribeToTopic = false;
     uint32_t ulTopicCount = 0U;
+    TickType_t xTicksToWait = pdMS_TO_TICKS( mqttexamplePROCESS_LOOP_TIMEOUT_MS );
+    TimeOut_t xTimeOut;
 
     /* Some fields not used by this demo so start with everything at 0. */
     ( void ) memset( ( void * ) &xMQTTSubscription, 0x00, sizeof( xMQTTSubscription ) );
@@ -841,8 +900,21 @@ static void prvMQTTSubscribeWithBackoffRetries( MQTTContext_t * pxMQTTContext )
          * receiving Publish message before subscribe ack is zero; but application
          * must be ready to receive any packet.  This demo uses the generic packet
          * processing function everywhere to highlight this fact. */
-        xResult = MQTT_ProcessLoop( pxMQTTContext, mqttexamplePROCESS_LOOP_TIMEOUT_MS );
-        configASSERT( xResult == MQTTSuccess );
+        vTaskSetTimeOutState( &xTimeOut );
+        xResult = MQTTSuccess;
+        xTicksToWait = pdMS_TO_TICKS( mqttexamplePROCESS_LOOP_TIMEOUT_MS );
+        while( ( xResult == MQTTSuccess ) || ( xResult == MQTTNeedMoreBytes ) )
+        {
+            xResult = MQTT_ProcessLoop( pxMQTTContext );
+
+            if( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) != pdFALSE )
+            {
+                /* Timed out before the wanted number of bytes were available, exit the
+                 * loop. */
+                break;
+            }
+        }
+        configASSERT( ( xResult == MQTTSuccess ) || ( xResult == MQTTNeedMoreBytes ) );
 
         /* Reset flag before checking suback responses. */
         xFailedSubscribeToTopic = false;
