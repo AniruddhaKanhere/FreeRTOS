@@ -45,7 +45,7 @@ jobs:
 
           # Run the release script
           pip install -r ./tools/.github/scripts/release-requirements.txt
-          ./tools/.github/scripts/release.py FreeRTOS --core-repo-path=local_core --core-commit=${{ github.event.inputs.commit_id }} --new-core-version=${{ github.event.inputs.version_number }} --core-repo-branch=Temp
+          ./tools/.github/scripts/release.py FreeRTOS --core-repo-path=local_core --core-commit=${{ github.event.inputs.commit_id }} --new-core-version=${{ github.event.inputs.version_number }} --core-repo-branch=Temp git_org=AniruddhaKanhere
           exit $?
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
