@@ -106,19 +106,17 @@ void main( void )
 
     /* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
      * of this file. */
-    #if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 )
-    {
-        main_blinky();
-    }
-    #elif( mainCREATE_PRODUCER_CONSUMER_TASKS == 1)
-    {
-        main_prod_cons();
-    }
-    #else
-    {
-        main_full();
-    }
-    #endif
+
+    xTaskCreate( producerTask,                    /* The function that implements the task. */
+                 "Tx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
+                 NULL,                            /* The parameter passed to the task - not used in this simple case. */
+                 0,                               /* The priority assigned to the task. */
+                 NULL );
+
+    /* Start the tasks and timer running. */
+    vTaskStartScheduler();
+
 }
 /*-----------------------------------------------------------*/
 
