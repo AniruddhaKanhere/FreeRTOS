@@ -110,6 +110,10 @@ void main( void )
     {
         main_blinky();
     }
+    #elif( mainCREATE_PRODUCER_CONSUMER_TASKS == 1)
+    {
+        main_prod_cons();
+    }
     #else
     {
         main_full();
