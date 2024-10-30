@@ -50,6 +50,10 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* User Includes */
+#include "producer.h"
+#include "consumer.h"
+
 /* Standard includes. */
 #include <stdio.h>
 #include <string.h>
