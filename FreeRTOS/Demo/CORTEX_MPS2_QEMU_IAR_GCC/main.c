@@ -81,6 +81,7 @@ void vFullDemoIdleFunction( void );
 static void prvUARTInit( void );
 
 /*-----------------------------------------------------------*/
+static const producerTaskParams_t producerTaskParams = {1, 1024};
 
 void main( void )
 {
@@ -90,13 +91,10 @@ void main( void )
     /* Hardware initialisation.  printf() output uses the UART for IO. */
     prvUARTInit();
 
-    /* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
-     * of this file. */
-
     xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
-                 NULL,                            /* The parameter passed to the task - not used in this simple case. */
+                 &producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
                  0,                               /* The priority assigned to the task. */
                  NULL );
 
