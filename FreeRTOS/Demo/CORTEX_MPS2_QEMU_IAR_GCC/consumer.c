@@ -34,13 +34,21 @@ static volatile uint8_t fakeSendRegister;
     This model assumes that you will be sending data during every tick, if you have lots of high priority tasks not sending data by calling this 
        function you may have to extend the buffer size to 1 more than the longest time between calls to this function in order to achieve maximum 
        data transfer rate, if you call the function less than this the max data rate cannot be achieved.
+
+    This model also contains a trap in the form of asserts which will trigger if there is a race condition hit inside of the driver which is not
+       designed to be thread-safe
 */
 int sendAtRate(void * data, int length)
 {
     /* Buffer index increments when there are bytes in the buffer, 0 indicates the buffer is empty */
     static long bufferIndex = 0;
     static TickType_t lastIterationTickCount = 0;
+    static uint8_t threadsafeIndicator = 1; // Init to safe
 
+    /* Assert that it is safe to enter the driver, this will cause an assert if the serialization was not done properly */
+    configASSERT(threadsafeIndicator == 1);
+    threadsafeIndicator = 0; // Set to unsafe
+    
     // TODO: this bit here should be de-FreeRTOS-ified, so that we do not use TickType_t and we do not use the Kernel specific function to get
     //          the tick count. Add an abstracted interface to get the tick count, perhaps a Macro through config to do it most effeciently.
     TickType_t currentTickCount = xTaskGetTickCount();
@@ -53,6 +61,8 @@ int sendAtRate(void * data, int length)
         If there has been no ticks since the last call all we have is the buffer, if there is space then
             great we accept the data, if not we accept what we have space left for, if any.
     */
+
+    
     if (ticksSinceLastCall > 0)
     {
         /* Catch the buffer condition up since the last call to this function. This is done by subtracting number of ticks times rate 
@@ -77,6 +87,8 @@ int sendAtRate(void * data, int length)
         fakeSendRegister = ((uint8_t*)data)[i];
         bufferIndex++;
     }
+
+    threadsafeIndicator = 1; // Set back to safe
 
     // If all the data fits in the buffer we send it all, else we send only the allowed amount.
     //   we indicate this by returning the number of bytes accepted into the buffer

@@ -52,9 +52,8 @@ void producerTask( void * params )
     // Wait for the trigger time to pass, basically hit the stopwatch when we hit PRODUCER_IMPULSE_TICK_COUNT
     while(PRODUCER_IMPULSE_TICK_COUNT > xTaskGetTickCount());
 
-    // Calk the chunk size
+    // Calculate the chunk size
     size_t chunksize = (PRODUCER_BUFFER_SIZE < producerTaskParams->bytesToSendPerIteration)? PRODUCER_BUFFER_SIZE : producerTaskParams->bytesToSendPerIteration;
-
 
     // Attempt to send a full chunk if we can, this depends on bytes left in the source as well as buffer space available downstream. We will
     //    offer the max amount of data we have available and accept that the driver will send as much of that as it is able to
@@ -79,6 +78,7 @@ void producerTask( void * params )
         remainingBytes -= shim_send(producerBuffer, remainingBytes);
     }
 
+    // Hit the stopwatch before writing to stdout
     TickType_t endTime = xTaskGetTickCount();
 
     printf("\r\nCompleted in %u ticks\r\n", (int)(endTime - PRODUCER_IMPULSE_TICK_COUNT));

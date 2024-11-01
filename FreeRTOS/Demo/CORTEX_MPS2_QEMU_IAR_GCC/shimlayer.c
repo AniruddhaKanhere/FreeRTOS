@@ -1,6 +1,7 @@
 #include "shimlayer.h"
 #include "consumer.h"
 
+#include "task.h"
 
 // CVE - What was the purpose of this shim layer? The interface can be defined in a header, I would prefer that, define the interface for send and recv 
 //   and implement it like a library. Define the functions as extern so the linker resolves them. Best case we can compile the entire test framework
@@ -12,7 +13,11 @@
 #if( USING_MUTEX == 1 )
     int shim_send(uint8_t * data, size_t length)
     {
-        return sendAtRate(data, length);
+        int retVal;
+        taskENTER_CRITICAL();
+        retVal = sendAtRate(data, length);
+        taskEXIT_CRITICAL();
+        return retVal;
     }
 
     size_t shim_recv(uint8_t * arr, size_t len)
