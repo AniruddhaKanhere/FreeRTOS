@@ -111,7 +111,7 @@ static const producerTaskParams_t producerTaskParams =
      10,000  : 1    : 90   -> Rate = 100+buffer of 1000
      100,000 : 1    : 990  -> Rate = 100+buffer of 1000
      100,000 : 100  : 990  -> Rate = 100+buffer of 1000
-     100,000 : 1000 : 990  -> Rate = 100+buffer of 1000  <- this one does not make sense, should be 990
+     100,000 : 1000 : 990  -> Rate = 100+buffer of 1000 
 
 */
 
