@@ -95,17 +95,6 @@ static const producerTaskParams_t producerTaskParams =
 
     Buffer = 1000
     Rate = 100
-    Theoretical Max for 10,000,000 = 100,000 ticks at 100 per tick
-
-    All this data exceeds the theoretical max so it is all wrong !
-
-     1,000,000 :1           :152    :150
-     10,000,000:1           :1540   :1558
-     10,000,000:10          :208    :158
-     10,000,000:100         :56     :60
-     10,000,000:200         :56     :54
-     10,000,000:1024        :44     :46
-     10,000,000:10240       :4      :46
 
      10,000  : 100  : 90   -> Rate = 100+buffer of 1000
      10,000  : 1    : 90   -> Rate = 100+buffer of 1000
