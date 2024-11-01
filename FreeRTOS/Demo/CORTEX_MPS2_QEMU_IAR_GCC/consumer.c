@@ -4,10 +4,11 @@
 #include <unistd.h>
 
 #include "FreeRTOS.h"
+#include "task.h"
 
 // Rate in bytes per tick
 // Limitation : This does not deal with the tick counter wrapping
-#define RATE  100
+#define RATE   100
 #define BUFLEN 1000
 
 static volatile uint8_t fakeSendRegister;
@@ -33,6 +34,7 @@ int sendAtRate(void * data, int length)
             bufferIndex -= maxConsumption;
         }
     }
+    
     // We allow at most the number of open spaces in the buffer to be sent
     long bytesAllowed = BUFLEN - bufferIndex;
 
@@ -43,6 +45,7 @@ int sendAtRate(void * data, int length)
     for (int i=0; i< bytesToSend; i++)
     {
         fakeSendRegister = ((uint8_t*)data)[i];
+        bufferIndex++;
     }
     // If all the data fits in the buffer we send it all, else we send only the allowed amount.
     //   we indicate this by returning the number of bytes accepted into the buffer

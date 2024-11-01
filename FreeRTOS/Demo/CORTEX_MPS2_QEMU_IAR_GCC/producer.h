@@ -10,7 +10,12 @@
 typedef struct producerTaskParams{
     TickType_t delayBetweenIteration;
     size_t bytesToSendPerIteration;
+    size_t impulse_magnitude;
 } producerTaskParams_t;
 
+
+void initProducer();
 void producerTask( void * params );
+
+
 #endif

@@ -6,6 +6,8 @@
 //   and implement it like a library. Define the functions as extern so the linker resolves them. Best case we can compile the entire test framework
 //   into a ".a" and you can just link it with the DUT code.
 
+// Ok in retrospect I get it, this is actually the DUP implementation, it is called via the shim_send interface and it calls the sendAtRate interface on 
+//   the other side. Lets figure out how we make this clean
 
 #if( USING_MUTEX == 1 )
     int shim_send(uint8_t * data, size_t length)

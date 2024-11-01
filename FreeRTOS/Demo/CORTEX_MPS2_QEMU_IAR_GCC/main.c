@@ -81,7 +81,42 @@ void vFullDemoIdleFunction( void );
 static void prvUARTInit( void );
 
 /*-----------------------------------------------------------*/
-static const producerTaskParams_t producerTaskParams = {1, 1024};
+static const producerTaskParams_t producerTaskParams = 
+    {
+        1, 
+        1000,      // Sending this many bytes at a time
+        100000     // Sending this many bytes
+    };  
+
+/*
+     Some results to ponder:
+
+     BytesTotal:Bytes/chunk :total ticks
+
+    Buffer = 1000
+    Rate = 100
+    Theoretical Max for 10,000,000 = 100,000 ticks at 100 per tick
+
+    All this data exceeds the theoretical max so it is all wrong !
+
+     1,000,000 :1           :152    :150
+     10,000,000:1           :1540   :1558
+     10,000,000:10          :208    :158
+     10,000,000:100         :56     :60
+     10,000,000:200         :56     :54
+     10,000,000:1024        :44     :46
+     10,000,000:10240       :4      :46
+
+     10,000  : 100  : 90   -> Rate = 100+buffer of 1000
+     10,000  : 1    : 90   -> Rate = 100+buffer of 1000
+     100,000 : 1    : 990  -> Rate = 100+buffer of 1000
+     100,000 : 100  : 990  -> Rate = 100+buffer of 1000
+     100,000 : 1000 : 990  -> Rate = 100+buffer of 1000  <- this one does not make sense, should be 990
+
+*/
+
+
+
 
 void main( void )
 {
@@ -90,17 +125,18 @@ void main( void )
 
     /* Hardware initialisation.  printf() output uses the UART for IO. */
     prvUARTInit();
-
+    initProducer();
+    
     xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
-                 &producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
+                 (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
                  0,                               /* The priority assigned to the task. */
                  NULL );
 
+
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
-
 }
 /*-----------------------------------------------------------*/
 
