@@ -5,15 +5,12 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "consumer.h"
 
 // Limitation : This does not (yet) deal with the tick counter wrapping. Logic to deal with that would be too expensive and we can do a
 //                perfectly sufficient test without running so long that the counter wraps, so when using this avoid this condition.
 
-// Rate in bytes per tick
-#define RATE   100
-#define BUFLEN 1000
-
-#if BUFLEN < RATE*2
+#if CONSUMER_BUFLEN < CONSUMER_RATE*2
     #warning If the configured buffer length is less than 2x the data rate this model will suffer from timing inaccuracies 
 #endif
 
@@ -40,18 +37,27 @@ static volatile uint8_t fakeSendRegister;
 */
 int sendAtRate(void * data, int length)
 {
-    /* Buffer index increments when there are bytes in the buffer, 0 indicates the buffer is empty */
-    static long bufferIndex = 0;
+    /* Buffer index increments when there are bytes in the buffer, 0 indicates the buffer is empty, we start the buffer full, this makes 
+            measurement of the results easier as we do not have the ability to measure when the buffer is drained in the background in HW */
+    static long bufferIndex = CONSUMER_BUFLEN-1;
     static TickType_t lastIterationTickCount = 0;
     static uint8_t threadsafeIndicator = 1; // Init to safe
 
     /* Assert that it is safe to enter the driver, this will cause an assert if the serialization was not done properly */
     configASSERT(threadsafeIndicator == 1);
     threadsafeIndicator = 0; // Set to unsafe
-    
+
+
     // TODO: this bit here should be de-FreeRTOS-ified, so that we do not use TickType_t and we do not use the Kernel specific function to get
     //          the tick count. Add an abstracted interface to get the tick count, perhaps a Macro through config to do it most effeciently.
     TickType_t currentTickCount = xTaskGetTickCount();
+
+    // This code ensures we start with a full buffer to make it easier to time the end of the test.
+    if (lastIterationTickCount == 0)
+    {
+        lastIterationTickCount = currentTickCount;
+    }
+
     TickType_t ticksSinceLastCall = currentTickCount - lastIterationTickCount;
     lastIterationTickCount = currentTickCount;
 
@@ -67,7 +73,7 @@ int sendAtRate(void * data, int length)
     {
         /* Catch the buffer condition up since the last call to this function. This is done by subtracting number of ticks times rate 
             from the buffer, if this is less than 0 we set the buffer to empty.  */
-        long maxConsumption = ticksSinceLastCall * RATE;
+        long maxConsumption = ticksSinceLastCall * CONSUMER_RATE;
         if (maxConsumption >= bufferIndex) {
             bufferIndex = 0;
         } else {
@@ -76,7 +82,7 @@ int sendAtRate(void * data, int length)
     }
 
     // We allow at most the number of open spaces in the buffer to be sent
-    long bytesAllowed = BUFLEN - bufferIndex;
+    long bytesAllowed = CONSUMER_BUFLEN - bufferIndex;
 
     // Calculate what is the most data we can send, this is the min of butesAllowed and length offered
     long bytesToSend = bytesAllowed < length ? bytesAllowed : length;

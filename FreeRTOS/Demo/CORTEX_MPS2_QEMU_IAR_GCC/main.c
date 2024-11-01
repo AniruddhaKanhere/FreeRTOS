@@ -84,8 +84,8 @@ static void prvUARTInit( void );
 static const producerTaskParams_t producerTaskParams = 
     {
         1, 
-        100,      // Sending this many bytes at a time
-        100000     // Sending this many bytes
+        1,      // Sending this many bytes at a time
+        100000   // Sending this many bytes
     };  
 
 /*
@@ -116,15 +116,34 @@ void main( void )
     prvUARTInit();
     initProducer();
     
+    printf("Starting Benchmark\r\n");
+    printf("Peripheral Line Speed %d bytes/tick\r\n", CONSUMER_RATE);
+    printf("Total to send : %d bytes\r\n", producerTaskParams.impulse_magnitude * 4);
+    printf("Theoretical best %d ticks\r\n\r\n", producerTaskParams.impulse_magnitude * 4 / CONSUMER_RATE);
+
     xTaskCreate( producerTask,                    /* The function that implements the task. */
-                 "Tx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 "Tx1",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
                  0,                               /* The priority assigned to the task. */
                  NULL );
 
    xTaskCreate( producerTask,                    /* The function that implements the task. */
-                 "Tx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 "Tx2",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
+                 (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
+                 0,                               /* The priority assigned to the task. */
+                 NULL );
+
+  xTaskCreate( producerTask,                    /* The function that implements the task. */
+                 "Tx3",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
+                 (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
+                 0,                               /* The priority assigned to the task. */
+                 NULL );
+
+  xTaskCreate( producerTask,                    /* The function that implements the task. */
+                 "Tx4",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
                  0,                               /* The priority assigned to the task. */
