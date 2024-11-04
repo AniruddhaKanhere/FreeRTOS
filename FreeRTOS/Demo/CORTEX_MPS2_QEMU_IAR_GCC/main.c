@@ -125,28 +125,28 @@ void main( void )
                  "Tx1",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 0,                               /* The priority assigned to the task. */
+                 1,                               /* The priority assigned to the task. */
                  NULL );
 
    xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx2",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 0,                               /* The priority assigned to the task. */
+                 1,                               /* The priority assigned to the task. */
                  NULL );
 
   xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx3",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 0,                               /* The priority assigned to the task. */
+                 1,                               /* The priority assigned to the task. */
                  NULL );
 
   xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx4",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 0,                               /* The priority assigned to the task. */
+                 1,                               /* The priority assigned to the task. */
                  NULL );
 
 
