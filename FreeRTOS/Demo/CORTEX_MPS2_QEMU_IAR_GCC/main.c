@@ -49,10 +49,13 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
 /* User Includes */
 #include "producer.h"
 #include "consumer.h"
+#include "shimlayer.h"
 
 /* Standard includes. */
 #include <stdio.h>
@@ -67,6 +70,7 @@
 #define UART0_BAUDDIV                         ( *( ( ( volatile uint32_t * ) ( UART0_ADDRESS + 16UL ) ) ) )
 #define TX_BUFFER_MASK                        ( 1UL )
 
+extern SemaphoreHandle_t xSemaphore;
 
 /*  CVE - leaving these here for now, they may be useful later
  * Only the comprehensive demo uses application hook (callback) functions.  See
@@ -119,20 +123,24 @@ void main( void )
     printf("Starting Benchmark\r\n");
     printf("Peripheral Line Speed %d bytes/tick\r\n", CONSUMER_RATE);
     printf("Total to send : %d bytes\r\n", producerTaskParams.impulse_magnitude * 4);
-    printf("Theoretical best %d ticks\r\n\r\n", producerTaskParams.impulse_magnitude * 4 / CONSUMER_RATE);
+    printf("Theoretical best %d ticks\r\n\r\n", producerTaskParams.impulse_magnitude * 4 / ( CONSUMER_RATE > CONSUMER_BUFLEN ? CONSUMER_BUFLEN : CONSUMER_RATE ) );
+
+    #if( USING_MUTEX == 1 )
+        xSemaphore = xSemaphoreCreateMutex();
+    #endif
 
     xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx1",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 1,                               /* The priority assigned to the task. */
+                 2,                               /* The priority assigned to the task. */
                  NULL );
 
    xTaskCreate( producerTask,                    /* The function that implements the task. */
                  "Tx2",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                  configMINIMAL_STACK_SIZE,        /* The size of the stack to allocate to the task. */
                  (void * const)&producerTaskParams,             /* The parameter passed to the task - not used in this simple case. */
-                 1,                               /* The priority assigned to the task. */
+                 2,                               /* The priority assigned to the task. */
                  NULL );
 
   xTaskCreate( producerTask,                    /* The function that implements the task. */

@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 // Rate in bytes per tick
-#define CONSUMER_RATE   50000
-#define CONSUMER_BUFLEN 100000
+#define CONSUMER_RATE   5000
+#define CONSUMER_BUFLEN 10000
 
 int sendAtRate(void * data, int length);
 #endif

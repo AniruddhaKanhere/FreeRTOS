@@ -1,6 +1,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "semphr.h"
 #include "producer.h"
 #include "shimlayer.h"
 
@@ -84,5 +85,6 @@ void producerTask( void * params )
     printf("\r\nCompleted in %u ticks\r\n", (int)(endTime - PRODUCER_IMPULSE_TICK_COUNT));
 
     // This task will delete itself when done
+    // vTaskDelay(10000);
     vTaskDelete(NULL);
 }
