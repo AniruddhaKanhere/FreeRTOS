@@ -13,6 +13,8 @@ on:
 
 jobs:
   git-secrets:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
