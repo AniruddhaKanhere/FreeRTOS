@@ -15,5 +15,13 @@ jobs:
   git-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Install ARM GCC
-        run: echo "hello world"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::241411971030:role/GithubOIDCrole
+      - name: Add file to s3
+        run: |
+          echo "Hello world" > temp.txt
+          aws s3 cp temp.txt s3://bucket123456tobedeleted/
+          
+        
