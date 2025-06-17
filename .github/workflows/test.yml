@@ -1,0 +1,19 @@
+name: Test checks access
+
+env:
+  bashPass: \033[32;1mPASSED -
+  bashInfo: \033[33;1mINFO -
+  bashFail: \033[31;1mFAILED -
+  bashEnd:  \033[0m
+
+on:
+    push:
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+  git-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install ARM GCC
+        run: echo "hello world"
