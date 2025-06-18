@@ -23,6 +23,8 @@ jobs:
           role-to-assume: arn:aws:iam::241411971030:role/GithubOIDCrole
       - name: Add file to s3
         run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository Owner: ${{ github.repository_owner }}"
           echo "Hello world" > temp.txt
           aws s3 cp temp.txt s3://bucket123456tobedeleted/
           
