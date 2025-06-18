@@ -26,6 +26,6 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "Repository Owner: ${{ github.repository_owner }}"
           echo "Hello world" > temp.txt
-          aws s3 cp temp.txt s3://bucket123456tobedeleted/
+          aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/
           
         
