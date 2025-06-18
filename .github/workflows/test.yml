@@ -28,9 +28,9 @@ jobs:
           TIMESTAMP="$(date +%Y%m%d%H%M%S)"
           FILE=temp.txt
           echo "Hello world" > ${FILE}
-          FILENAME="${FILE%.zip}"
+          FILENAME="${FILE%.txt}"
           # Rename with timestamp
-          NEW_FILENAME="${FILENAME}.${TIMESTAMP}.zip"
+          NEW_FILENAME="${FILENAME}.${TIMESTAMP}.txt"
           aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/${NEW_FILENAME}
           
         
