@@ -25,8 +25,12 @@ jobs:
         run: |
           echo "Repository: ${{ github.repository }}"
           echo "Repository Owner: ${{ github.repository_owner }}"
-          echo "$(date +%Y%m%d%H%M%S)"
-          echo "Hello world" > temp.txt
-          aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/
+          TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+          FILE=temp.txt
+          echo "Hello world" > ${FILE}
+          FILENAME="${FILE%.zip}"
+          # Rename with timestamp
+          NEW_FILENAME="${FILENAME}.${TIMESTAMP}.zip"
+          aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/NEW_FILENAME
           
         
