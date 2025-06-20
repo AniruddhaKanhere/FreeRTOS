@@ -31,7 +31,8 @@ jobs:
           FILENAME="${FILE%.txt}"
           # Rename with timestamp
           NEW_FILENAME="${FILENAME}.${TIMESTAMP}.txt"
-          aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/${NEW_FILENAME}
-          aws s3 cp temp.txt s3://bucket123456tobedeleted/${{ github.repository }}/
-          
-        
+          aws s3api put-object \
+            --bucket bucket123456tobedeleted \
+            --key s3://bucket123456tobedeleted/${{ github.repository }}/${NEW_FILENAME} \
+            --body temp.txt \
+            --if-none-match "*"
