@@ -34,4 +34,5 @@ jobs:
           aws s3api put-object \
             --bucket bucket123456tobedeleted \
             --key ${{ github.repository }}/temp.txt \
-            --body temp.txt
+            --body temp.txt \
+            --if-none-match "*"
