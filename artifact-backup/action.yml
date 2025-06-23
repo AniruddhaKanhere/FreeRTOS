@@ -59,7 +59,7 @@ runs:
             --bucket ${{ env.BUCKET_NAME }} \
             --key ${{ github.repository }}/${{ inputs.release_tag }}/${NEW_FILENAME} \
             --body ${{ inputs.artifact_path }} \
-            --if-none-match "*"  > /dev/null 2>&1 ; then
+            --if-none-match "*"  > /dev/null; then
             echo "::error::Failed to upload artifact to S3"
             exit 1
           fi
@@ -87,7 +87,7 @@ runs:
             --bucket ${{ env.BUCKET_NAME }} \
             --key ${{ github.repository }}/${{ inputs.release_tag }}/SHA256.txt \
             --body SHA256.txt \
-            --if-none-match "*" > /dev/null 2>&1 ; then
+            --if-none-match "*" > /dev/null; then
             echo "::error::Failed to upload SHA256 hash to S3"
             exit 1
           fi
