@@ -10,7 +10,7 @@ inputs:
   aws_account_id:
     description: 'AWS account ID (most probably you need not provide this)'
     required: false
-    default: '178185592318'
+    default: '241411971030' #TODO: UPDATE
   aws_region:
     description: 'AWS region (most probably you need not provide this)'
     required: false
@@ -18,7 +18,7 @@ inputs:
   bucket_name:
     description: 'S3 bucket name (most probably you need not provide this)'
     required: false
-    default: 'frtos-artifact-bckup-us-east-1-alpha'
+    default: 'bucket123456tobedeleted' #TODO: UPDATE
 
 runs:
   permissions:
