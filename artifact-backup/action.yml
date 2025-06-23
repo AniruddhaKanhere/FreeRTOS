@@ -21,8 +21,6 @@ inputs:
     default: 'bucket123456tobedeleted' #TODO: UPDATE
 
 runs:
-  permissions:
-      id-token: write
   using: "composite"
   steps:
       - name: Extract repository name
