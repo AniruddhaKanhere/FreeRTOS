@@ -15,8 +15,9 @@ jobs:
   auto-release:
     permissions:
       id-token: write
+      contents: write
     name: Auto Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Tool Setup
         uses: actions/setup-python@v2
@@ -55,6 +56,12 @@ jobs:
           pip install -r ./tools/.github/scripts/release-requirements.txt
           ./tools/.github/scripts/release.py "$GITHUB_ORG" --core-repo-path=local_core --core-commit="$COMMIT_ID" --new-core-version="$VERSION_NUMBER"
           exit $?
+
+      - name: Get dir struct
+        run: |
+          ls -al ./tools/.github/scripts
+          ls  ./
+          pwd
       
       - name: Backup Release Asset
         uses: FreeRTOS/CI-CD-Github-Actions/artifact-backup@main
