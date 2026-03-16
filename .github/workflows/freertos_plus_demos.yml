@@ -459,22 +459,18 @@ jobs:
         id: mqtt-broker
         shell: bash
         run: |
-          # Download and install Mosquitto to runner temp directory
-          MOSQUITTO_DIR="${RUNNER_TEMP}/mosquitto"
-          mkdir -p "$MOSQUITTO_DIR"
-          curl -L -o "$MOSQUITTO_DIR/mosquitto.zip" https://mosquitto.org/files/binary/win64/mosquitto-2.0.21-install-windows-x64.zip
-          unzip -o "$MOSQUITTO_DIR/mosquitto.zip" -d "$MOSQUITTO_DIR"
+          # Install Mosquitto via Chocolatey (pre-installed on GitHub runners)
+          choco install mosquitto -y --no-progress
+          MOSQUITTO_DIR="/c/Program Files/mosquitto"
 
           # Write Mosquitto configuration for MQTT v5 support
-          cat > "$MOSQUITTO_DIR/mosquitto.conf" <<EOF
+          cat > "${RUNNER_TEMP}/mosquitto.conf" <<EOF
           per_listener_settings false
           allow_anonymous true
 
-          # Plaintext listener
           listener 1883 ${{ env.server_ip }}
           protocol mqtt
 
-          # TLS listener
           listener 8883 ${{ env.server_ip }}
           protocol mqtt
           cafile ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
@@ -484,7 +480,7 @@ jobs:
           EOF
 
           # Start Mosquitto in the background
-          "$MOSQUITTO_DIR/mosquitto.exe" -c "$MOSQUITTO_DIR/mosquitto.conf" -v &
+          "$MOSQUITTO_DIR/mosquitto.exe" -c "${RUNNER_TEMP}/mosquitto.conf" -v &
           sleep 3
 
           # Verify broker is running
@@ -492,7 +488,6 @@ jobs:
             echo "Mosquitto broker started successfully"
           else
             echo "ERROR: Mosquitto broker failed to start"
-            cat "$MOSQUITTO_DIR/mosquitto.conf"
             exit 1
           fi
 
