@@ -884,6 +884,7 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
         configASSERT( xResult == MQTTSuccess );
 
         xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
+        MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
         configASSERT( xResult == MQTTSuccess );
 
         xResult = MQTT_Connect( pxMQTTContext,

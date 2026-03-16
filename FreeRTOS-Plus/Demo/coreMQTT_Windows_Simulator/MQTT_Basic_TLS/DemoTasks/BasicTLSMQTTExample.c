@@ -736,6 +736,7 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
 
     /* Add receive maximum of 10. */
     xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Send MQTT CONNECT packet to broker. LWT is not used in this demo, so it

@@ -753,6 +753,7 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
 
     /* Set receive maximum to 10. */
     xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Get size requirement for the connect packet.
