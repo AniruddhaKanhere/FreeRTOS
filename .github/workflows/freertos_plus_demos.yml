@@ -455,17 +455,46 @@ jobs:
           echo "server_ip=$SERVER_IP" >> $env:GITHUB_ENV
         shell: pwsh
 
-      - name: Start localhost MQTT broker
+      - name: Install and start Mosquitto MQTT broker
         id: mqtt-broker
-        uses: FreeRTOS/CI-CD-GitHub-Actions/localhost-mqtt-broker@main
-        with:
-          host_address: ${{ env.server_ip }}
-          root-ca-cert-path:
-            ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
-          server-priv-key-path:
-            ${{ steps.generate-credentials.outputs.server-priv-key-path }}
-          server-cert-path:
-            ${{ steps.generate-credentials.outputs.server-cert-path }}
+        shell: bash
+        run: |
+          # Download and install Mosquitto to runner temp directory
+          MOSQUITTO_DIR="${RUNNER_TEMP}/mosquitto"
+          mkdir -p "$MOSQUITTO_DIR"
+          curl -L -o "$MOSQUITTO_DIR/mosquitto.zip" https://mosquitto.org/files/binary/win64/mosquitto-2.0.21-install-windows-x64.zip
+          unzip -o "$MOSQUITTO_DIR/mosquitto.zip" -d "$MOSQUITTO_DIR"
+
+          # Write Mosquitto configuration for MQTT v5 support
+          cat > "$MOSQUITTO_DIR/mosquitto.conf" <<EOF
+          per_listener_settings false
+          allow_anonymous true
+
+          # Plaintext listener
+          listener 1883 ${{ env.server_ip }}
+          protocol mqtt
+
+          # TLS listener
+          listener 8883 ${{ env.server_ip }}
+          protocol mqtt
+          cafile ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
+          certfile ${{ steps.generate-credentials.outputs.server-cert-path }}
+          keyfile ${{ steps.generate-credentials.outputs.server-priv-key-path }}
+          tls_version tlsv1.2
+          EOF
+
+          # Start Mosquitto in the background
+          "$MOSQUITTO_DIR/mosquitto.exe" -c "$MOSQUITTO_DIR/mosquitto.conf" -v &
+          sleep 3
+
+          # Verify broker is running
+          if tasklist | grep -qi mosquitto; then
+            echo "Mosquitto broker started successfully"
+          else
+            echo "ERROR: Mosquitto broker failed to start"
+            cat "$MOSQUITTO_DIR/mosquitto.conf"
+            exit 1
+          fi
 
       - env:
           stepName: Update main.c to force stdout to write immediately
