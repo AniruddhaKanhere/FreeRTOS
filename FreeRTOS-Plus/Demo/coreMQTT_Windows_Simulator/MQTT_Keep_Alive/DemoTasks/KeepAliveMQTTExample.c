@@ -129,7 +129,7 @@
 /**
  * @brief Timeout for receiving CONNACK packet in milliseconds.
  */
-#define mqttexampleCONNACK_RECV_TIMEOUT_MS           ( 1000U )
+#define mqttexampleCONNACK_RECV_TIMEOUT_MS                ( 10000U )
 
 /**
  * @brief The topic to subscribe and publish to in the example.
