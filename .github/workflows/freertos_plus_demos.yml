@@ -459,9 +459,12 @@ jobs:
         id: mqtt-broker
         shell: bash
         run: |
-          # Install Mosquitto via Chocolatey (pre-installed on GitHub runners)
-          choco install mosquitto -y --no-progress
-          MOSQUITTO_DIR="/c/Program Files/mosquitto"
+          # Download and silently install Mosquitto
+          curl -L -o "${RUNNER_TEMP}/mosquitto-install.exe" https://mosquitto.org/files/binary/win64/mosquitto-2.1.2-install-windows-x64.exe
+          "${RUNNER_TEMP}/mosquitto-install.exe" /S /D=C:\\mosquitto
+          sleep 5
+
+          MOSQUITTO_DIR="/c/mosquitto"
 
           # Write Mosquitto configuration for MQTT v5 support
           cat > "${RUNNER_TEMP}/mosquitto.conf" <<EOF
