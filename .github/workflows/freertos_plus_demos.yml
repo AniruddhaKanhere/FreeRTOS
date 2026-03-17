@@ -482,11 +482,14 @@ jobs:
           }
 
       - name: Start Mosquitto MQTT broker
-        shell: bash
+        shell: pwsh
         run: |
-          # Write Mosquitto configuration
-          cat > "${RUNNER_TEMP}/mosquitto.conf" <<EOF
-          per_listener_settings false
+          $cafile = "${{ steps.generate-credentials.outputs.root-ca-cert-path }}" -replace '/','\' 
+          $certfile = "${{ steps.generate-credentials.outputs.server-cert-path }}" -replace '/','\' 
+          $keyfile = "${{ steps.generate-credentials.outputs.server-priv-key-path }}" -replace '/','\' 
+          $confPath = "$env:RUNNER_TEMP\mosquitto.conf"
+
+          @"
           allow_anonymous true
 
           listener 1883 ${{ env.server_ip }}
@@ -494,21 +497,23 @@ jobs:
 
           listener 8883 ${{ env.server_ip }}
           protocol mqtt
-          cafile ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
-          certfile ${{ steps.generate-credentials.outputs.server-cert-path }}
-          keyfile ${{ steps.generate-credentials.outputs.server-priv-key-path }}
+          cafile $cafile
+          certfile $certfile
+          keyfile $keyfile
           tls_version tlsv1.2
-          EOF
+          "@ | Set-Content -Path $confPath
 
-          /c/mosquitto/mosquitto.exe -c "${RUNNER_TEMP}/mosquitto.conf" -v &
-          sleep 3
+          Get-Content $confPath
 
-          if tasklist | grep -qi mosquitto; then
-            echo "Mosquitto broker started successfully"
-          else
-            echo "ERROR: Mosquitto broker failed to start"
+          Start-Process -FilePath "C:\mosquitto\mosquitto.exe" -ArgumentList "-c",$confPath,"-v" -NoNewWindow
+          Start-Sleep -Seconds 3
+
+          if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
+            Write-Host "Mosquitto broker started successfully"
+          } else {
+            Write-Host "ERROR: Mosquitto broker failed to start"
             exit 1
-          fi
+          }
 
       - env:
           stepName: Update main.c to force stdout to write immediately
