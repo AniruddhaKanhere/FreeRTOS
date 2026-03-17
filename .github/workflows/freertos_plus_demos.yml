@@ -461,6 +461,10 @@ jobs:
         id: mqtt-broker
         shell: bash
         run: |
+          # Switch Docker to Linux containers on Windows
+          & 'C:\Program Files\Docker\Docker\DockerCli.exe' -SwitchLinuxEngine 2>/dev/null || true
+          sleep 5
+
           CERT_DIR=$(dirname "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
 
           # Write Mosquitto config
