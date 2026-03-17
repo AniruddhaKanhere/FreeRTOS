@@ -484,9 +484,9 @@ jobs:
       - name: Start Mosquitto MQTT broker
         shell: pwsh
         run: |
-          $cafile = "${{ steps.generate-credentials.outputs.root-ca-cert-path }}" -replace '/','\' 
-          $certfile = "${{ steps.generate-credentials.outputs.server-cert-path }}" -replace '/','\' 
-          $keyfile = "${{ steps.generate-credentials.outputs.server-priv-key-path }}" -replace '/','\' 
+          $cafile = (& cygpath -w "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
+          $certfile = (& cygpath -w "${{ steps.generate-credentials.outputs.server-cert-path }}")
+          $keyfile = (& cygpath -w "${{ steps.generate-credentials.outputs.server-priv-key-path }}")
           $confPath = "$env:RUNNER_TEMP\mosquitto.conf"
 
           @"
