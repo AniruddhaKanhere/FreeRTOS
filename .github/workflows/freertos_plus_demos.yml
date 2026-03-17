@@ -492,10 +492,10 @@ jobs:
           @"
           allow_anonymous true
 
-          listener 1883 ${{ env.server_ip }}
+          listener 1883 0.0.0.0
           protocol mqtt
 
-          listener 8883 ${{ env.server_ip }}
+          listener 8883 0.0.0.0
           protocol mqtt
           cafile $cafile
           certfile $certfile
