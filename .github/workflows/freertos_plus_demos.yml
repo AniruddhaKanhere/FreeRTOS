@@ -459,31 +459,30 @@ jobs:
         id: mqtt-broker
         shell: pwsh
         run: |
+          # Disable Windows Firewall to allow connections from libslirp virtual network
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+
           # Download Mosquitto installer
           $installerPath = "$env:RUNNER_TEMP\mosquitto-install.exe"
           Invoke-WebRequest -Uri "https://mosquitto.org/files/binary/win64/mosquitto-2.1.2-install-windows-x64.exe" -OutFile $installerPath
 
-          # Run silent install (start as process with timeout to avoid hanging)
+          # Run silent install
           $proc = Start-Process -FilePath $installerPath -ArgumentList '/S','/D=C:\mosquitto' -PassThru
           $proc | Wait-Process -Timeout 60 -ErrorAction SilentlyContinue
           if (!$proc.HasExited) {
             $proc | Stop-Process -Force
-            Write-Host "Installer timed out but files should be extracted"
           }
 
           # Stop any auto-started mosquitto service
           Stop-Service -Name mosquitto -ErrorAction SilentlyContinue
           Start-Sleep -Seconds 2
 
-          # Verify mosquitto.exe exists
           if (!(Test-Path "C:\mosquitto\mosquitto.exe")) {
             Write-Host "ERROR: mosquitto.exe not found"
             exit 1
           }
 
-      - name: Start Mosquitto MQTT broker
-        shell: pwsh
-        run: |
+          # Build config with Windows-format cert paths
           $cafile = (& cygpath -w "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
           $certfile = (& cygpath -w "${{ steps.generate-credentials.outputs.server-cert-path }}")
           $keyfile = (& cygpath -w "${{ steps.generate-credentials.outputs.server-priv-key-path }}")
@@ -507,9 +506,6 @@ jobs:
 
           Start-Process -FilePath "C:\mosquitto\mosquitto.exe" -ArgumentList "-c",$confPath,"-v" -NoNewWindow
           Start-Sleep -Seconds 3
-
-          # Allow Mosquitto through Windows Firewall
-          New-NetFirewallRule -DisplayName "Mosquitto MQTT" -Direction Inbound -Program "C:\mosquitto\mosquitto.exe" -Action Allow -ErrorAction SilentlyContinue
 
           if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
             Write-Host "Mosquitto broker started successfully"
