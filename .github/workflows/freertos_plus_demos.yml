@@ -508,6 +508,9 @@ jobs:
           Start-Process -FilePath "C:\mosquitto\mosquitto.exe" -ArgumentList "-c",$confPath,"-v" -NoNewWindow
           Start-Sleep -Seconds 3
 
+          # Allow Mosquitto through Windows Firewall
+          New-NetFirewallRule -DisplayName "Mosquitto MQTT" -Direction Inbound -Program "C:\mosquitto\mosquitto.exe" -Action Allow -ErrorAction SilentlyContinue
+
           if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
             Write-Host "Mosquitto broker started successfully"
           } else {
