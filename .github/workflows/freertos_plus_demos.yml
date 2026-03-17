@@ -449,9 +449,11 @@ jobs:
       - name: Query CI host IP address
         id: get-ip
         run: |
-          # Query the device's IP address
-          $SERVER_IP = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '127.0.0.1' } | Select-Object -First 1 -ExpandProperty IPAddress)
-          Write-Host "Device IP address: $SERVER_IP"
+          # The FreeRTOS+TCP libslirp virtual network reaches the host at 10.0.2.2
+          # (hardcoded in MBuffNetifBackendLibslirp.c). The broker listens on 0.0.0.0
+          # so it is reachable at this address from the virtual network.
+          $SERVER_IP = "10.0.2.2"
+          Write-Host "Using libslirp host address: $SERVER_IP"
           echo "server_ip=$SERVER_IP" >> $env:GITHUB_ENV
         shell: pwsh
 
