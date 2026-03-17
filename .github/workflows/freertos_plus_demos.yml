@@ -457,52 +457,58 @@ jobs:
           echo "server_ip=$SERVER_IP" >> $env:GITHUB_ENV
         shell: pwsh
 
-      - name: Switch Docker to Linux containers
+      - name: Install and start Mosquitto MQTT v5 broker
+        id: mqtt-broker
         shell: pwsh
         run: |
-          & 'C:\Program Files\Docker\Docker\DockerCli.exe' -SwitchLinuxEngine
-          Start-Sleep -Seconds 5
+          # Download and silently install Mosquitto
+          $installerPath = "$env:RUNNER_TEMP\mosquitto-install.exe"
+          Invoke-WebRequest -Uri "https://mosquitto.org/files/binary/win64/mosquitto-2.1.2-install-windows-x64.exe" -OutFile $installerPath
+          $proc = Start-Process -FilePath $installerPath -ArgumentList '/S','/D=C:\mosquitto' -PassThru
+          $proc | Wait-Process -Timeout 120 -ErrorAction SilentlyContinue
+          if (!$proc.HasExited) { $proc | Stop-Process -Force }
+          Stop-Service -Name mosquitto -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 2
 
-      - name: Start Mosquitto MQTT v5 broker in Docker
-        id: mqtt-broker
-        shell: bash
-        run: |
-          CERT_DIR=$(dirname "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
+          if (!(Test-Path "C:\mosquitto\mosquitto.exe")) {
+            Write-Host "ERROR: mosquitto.exe not found after install"
+            exit 1
+          }
 
-          # Write Mosquitto config
-          cat > "${CERT_DIR}/mosquitto.conf" <<EOF
+          # Disable firewall so libslirp virtual network can reach the broker
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+
+          # Build config with Windows cert paths
+          $cafile = (Resolve-Path "${{ steps.generate-credentials.outputs.root-ca-cert-path }}").Path
+          $certfile = (Resolve-Path "${{ steps.generate-credentials.outputs.server-cert-path }}").Path
+          $keyfile = (Resolve-Path "${{ steps.generate-credentials.outputs.server-priv-key-path }}").Path
+          $confPath = "$env:RUNNER_TEMP\mosquitto.conf"
+
+          @"
           allow_anonymous true
-
           listener 1883 0.0.0.0
           protocol mqtt
-
           listener 8883 0.0.0.0
           protocol mqtt
-          cafile /mosquitto/certs/$(basename "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
-          certfile /mosquitto/certs/$(basename "${{ steps.generate-credentials.outputs.server-cert-path }}")
-          keyfile /mosquitto/certs/$(basename "${{ steps.generate-credentials.outputs.server-priv-key-path }}")
+          cafile $cafile
+          certfile $certfile
+          keyfile $keyfile
           tls_version tlsv1.2
-          EOF
+          "@ | Set-Content -Path $confPath
 
-          cat "${CERT_DIR}/mosquitto.conf"
+          Write-Host "=== Mosquitto config ==="
+          Get-Content $confPath
 
-          docker run -d --name mosquitto \
-            -p 1883:1883 \
-            -p 8883:8883 \
-            -v "${CERT_DIR}:/mosquitto/certs:ro" \
-            -v "${CERT_DIR}/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro" \
-            eclipse-mosquitto:2
+          # Start broker
+          Start-Process -FilePath "C:\mosquitto\mosquitto.exe" -ArgumentList "-c",$confPath,"-v" -NoNewWindow
+          Start-Sleep -Seconds 3
 
-          sleep 3
-
-          if docker ps | grep -q mosquitto; then
-            echo "Mosquitto broker started successfully"
-            docker logs mosquitto
-          else
-            echo "ERROR: Mosquitto broker failed to start"
-            docker logs mosquitto
+          if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
+            Write-Host "Mosquitto broker started successfully"
+          } else {
+            Write-Host "ERROR: Mosquitto broker failed to start"
             exit 1
-          fi
+          }
 
       - env:
           stepName: Update main.c to force stdout to write immediately
