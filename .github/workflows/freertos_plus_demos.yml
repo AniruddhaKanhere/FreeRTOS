@@ -455,11 +455,10 @@ jobs:
           echo "server_ip=$SERVER_IP" >> $env:GITHUB_ENV
         shell: pwsh
 
-      - name: Install and start Mosquitto MQTT v5 broker
-        id: mqtt-broker
+      - name: Install Mosquitto MQTT v5 broker
+        id: install-mosquitto
         shell: pwsh
         run: |
-          # Download and silently install Mosquitto
           $installerPath = "$env:RUNNER_TEMP\mosquitto-install.exe"
           Invoke-WebRequest -Uri "https://mosquitto.org/files/binary/win64/mosquitto-2.1.2-install-windows-x64.exe" -OutFile $installerPath
           $proc = Start-Process -FilePath $installerPath -ArgumentList '/S','/D=C:\mosquitto' -PassThru
@@ -467,57 +466,46 @@ jobs:
           if (!$proc.HasExited) { $proc | Stop-Process -Force }
           Stop-Service -Name mosquitto -ErrorAction SilentlyContinue
           Start-Sleep -Seconds 2
-
           if (!(Test-Path "C:\mosquitto\mosquitto.exe")) {
-            Write-Host "ERROR: mosquitto.exe not found after install"
+            Write-Host "ERROR: mosquitto.exe not found"
             exit 1
           }
+          Write-Host "Mosquitto installed successfully"
 
-          # Disable firewall so libslirp virtual network can reach the broker
-          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
-          New-NetFirewallRule -DisplayName "MQTT 1883" -Direction Inbound -LocalPort 1883 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
-          New-NetFirewallRule -DisplayName "MQTT 8883" -Direction Inbound -LocalPort 8883 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
-          New-NetFirewallRule -DisplayName "Mosquitto" -Direction Inbound -Program "C:\mosquitto\mosquitto.exe" -Action Allow -ErrorAction SilentlyContinue
+      - name: Start Mosquitto MQTT v5 broker
+        id: mqtt-broker
+        shell: bash
+        run: |
+          # Convert MSYS cert paths to Windows paths
+          CAFILE=$(cygpath -w "${{ steps.generate-credentials.outputs.root-ca-cert-path }}")
+          CERTFILE=$(cygpath -w "${{ steps.generate-credentials.outputs.server-cert-path }}")
+          KEYFILE=$(cygpath -w "${{ steps.generate-credentials.outputs.server-priv-key-path }}")
 
-          # Verify ports are not already in use
-          netstat -an | Select-String ":1883 " | Write-Host
-          netstat -an | Select-String ":8883 " | Write-Host
-
-          # Convert MSYS paths to Windows paths
-          $cafile = "${{ steps.generate-credentials.outputs.root-ca-cert-path }}" -replace '^/([a-zA-Z])/', '$1:\'  -replace '/', '\'
-          $certfile = "${{ steps.generate-credentials.outputs.server-cert-path }}" -replace '^/([a-zA-Z])/', '$1:\' -replace '/', '\'
-          $keyfile = "${{ steps.generate-credentials.outputs.server-priv-key-path }}" -replace '^/([a-zA-Z])/', '$1:\' -replace '/', '\'
-          $confPath = "$env:RUNNER_TEMP\mosquitto.conf"
-
-          @"
+          # Write config
+          cat > "$(cygpath -w "${RUNNER_TEMP}")/mosquitto.conf" <<EOF
           allow_anonymous true
           listener 1883 ${{ env.server_ip }}
           protocol mqtt
           listener 8883 ${{ env.server_ip }}
           protocol mqtt
-          cafile $cafile
-          certfile $certfile
-          keyfile $keyfile
+          cafile ${CAFILE}
+          certfile ${CERTFILE}
+          keyfile ${KEYFILE}
           tls_version tlsv1.2
-          "@ | Set-Content -Path $confPath
+          EOF
 
-          Write-Host "=== Mosquitto config ==="
-          Get-Content $confPath
+          cat "$(cygpath -w "${RUNNER_TEMP}")/mosquitto.conf"
 
-          # Start broker
-          Start-Process -FilePath "C:\mosquitto\mosquitto.exe" -ArgumentList "-c",$confPath,"-v" -NoNewWindow
-          Start-Sleep -Seconds 3
+          # Start broker in background with & (same pattern as old Python broker)
+          /c/mosquitto/mosquitto.exe -c "$(cygpath -w "${RUNNER_TEMP}")/mosquitto.conf" -v &
+          sleep 3
 
-          if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
-            Write-Host "Mosquitto broker started successfully"
-            Write-Host "=== Listening ports ==="
-            netstat -an | Select-String ":1883 |:8883 "
-            Write-Host "=== Firewall status ==="
-            Get-NetFirewallProfile | Select-Object Name, Enabled | Format-Table
-          } else {
-            Write-Host "ERROR: Mosquitto broker failed to start"
+          if tasklist | grep -qi mosquitto; then
+            echo "Mosquitto broker started successfully"
+          else
+            echo "ERROR: Mosquitto broker failed to start"
             exit 1
-          }
+          fi
 
       - env:
           stepName: Update main.c to force stdout to write immediately
