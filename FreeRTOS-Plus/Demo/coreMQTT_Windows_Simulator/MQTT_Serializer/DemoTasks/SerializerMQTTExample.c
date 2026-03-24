@@ -1351,7 +1351,7 @@ static void prvMQTTProcessIncomingPacket( Socket_t xMQTTSocket )
         /* Check if the incoming packet is a publish packet. */
         if( ( xIncomingPacket.type & 0xf0 ) == MQTT_PACKET_TYPE_PUBLISH )
         {
-            xResult = MQTT_DeserializePublish( &xIncomingPacket, &usPacketId, &xPublishInfo );
+            xResult = MQTT_DeserializePublish( &xIncomingPacket, &usPacketId, &xPublishInfo, NULL, 0U, 0U );
             configASSERT( xResult == MQTTSuccess );
 
             /* Process incoming Publish message. */
