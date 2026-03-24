@@ -478,10 +478,10 @@ jobs:
           # Disable firewall so libslirp virtual network can reach the broker
           Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
-          # Build config with Windows cert paths
-          $cafile = (Resolve-Path "${{ steps.generate-credentials.outputs.root-ca-cert-path }}").Path
-          $certfile = (Resolve-Path "${{ steps.generate-credentials.outputs.server-cert-path }}").Path
-          $keyfile = (Resolve-Path "${{ steps.generate-credentials.outputs.server-priv-key-path }}").Path
+          # Convert MSYS paths to Windows paths
+          $cafile = "${{ steps.generate-credentials.outputs.root-ca-cert-path }}" -replace '^/([a-zA-Z])/', '$1:\'  -replace '/', '\'
+          $certfile = "${{ steps.generate-credentials.outputs.server-cert-path }}" -replace '^/([a-zA-Z])/', '$1:\' -replace '/', '\'
+          $keyfile = "${{ steps.generate-credentials.outputs.server-priv-key-path }}" -replace '^/([a-zA-Z])/', '$1:\' -replace '/', '\'
           $confPath = "$env:RUNNER_TEMP\mosquitto.conf"
 
           @"
