@@ -475,6 +475,13 @@ jobs:
 
           # Disable firewall so libslirp virtual network can reach the broker
           Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+          New-NetFirewallRule -DisplayName "MQTT 1883" -Direction Inbound -LocalPort 1883 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
+          New-NetFirewallRule -DisplayName "MQTT 8883" -Direction Inbound -LocalPort 8883 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue
+          New-NetFirewallRule -DisplayName "Mosquitto" -Direction Inbound -Program "C:\mosquitto\mosquitto.exe" -Action Allow -ErrorAction SilentlyContinue
+
+          # Verify ports are not already in use
+          netstat -an | Select-String ":1883 " | Write-Host
+          netstat -an | Select-String ":8883 " | Write-Host
 
           # Convert MSYS paths to Windows paths
           $cafile = "${{ steps.generate-credentials.outputs.root-ca-cert-path }}" -replace '^/([a-zA-Z])/', '$1:\'  -replace '/', '\'
@@ -503,6 +510,10 @@ jobs:
 
           if (Get-Process -Name mosquitto -ErrorAction SilentlyContinue) {
             Write-Host "Mosquitto broker started successfully"
+            Write-Host "=== Listening ports ==="
+            netstat -an | Select-String ":1883 |:8883 "
+            Write-Host "=== Firewall status ==="
+            Get-NetFirewallProfile | Select-Object Name, Enabled | Format-Table
           } else {
             Write-Host "ERROR: Mosquitto broker failed to start"
             exit 1
