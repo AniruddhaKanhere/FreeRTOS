@@ -717,6 +717,7 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     NetworkContext_t xNetworkContext;
     MQTTPropBuilder_t xConnectProps;
     uint8_t ucConnectPropsBuf[ 200 ];
+    MQTTConnectionProperties_t xConnectProperties;
 
     /***
      * For readability, error handling in this function is restricted to the use of
@@ -811,11 +812,12 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     configASSERT( xStatus == ( BaseType_t ) xIncomingPacket.remainingLength );
 
     xIncomingPacket.pRemainingData = xBuffer.pBuffer;
+    ( void ) memset( &xConnectProperties, 0x00, sizeof( xConnectProperties ) );
     xResult = MQTT_DeserializeAck( &xIncomingPacket,
                                    &usPacketId,
                                    NULL,
                                    NULL,
-                                   NULL );
+                                   &xConnectProperties );
 
     /* Log this convenient demo information before asserting if the result is
      * successful. */
