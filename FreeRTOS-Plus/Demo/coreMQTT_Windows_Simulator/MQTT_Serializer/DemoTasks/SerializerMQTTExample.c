@@ -376,6 +376,12 @@ const static MQTTFixedBuffer_t xBuffer =
     .size    = mqttexampleSHARED_BUFFER_SIZE
 };
 
+/**
+ * @brief Connection properties received from the broker in CONNACK.
+ * Passed to MQTT_DeserializeAck for subsequent ACK packets.
+ */
+static MQTTConnectionProperties_t xConnectionProperties;
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -713,11 +719,10 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     MQTTStatus_t xResult;
     MQTTPacketInfo_t xIncomingPacket;
     MQTTConnectInfo_t xConnectInfo;
-    uint16_t usPacketId;
+    bool xSessionPresent;
     NetworkContext_t xNetworkContext;
     MQTTPropBuilder_t xConnectProps;
     uint8_t ucConnectPropsBuf[ 200 ];
-    MQTTConnectionProperties_t xConnectProperties;
 
     /***
      * For readability, error handling in this function is restricted to the use of
@@ -812,12 +817,11 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     configASSERT( xStatus == ( BaseType_t ) xIncomingPacket.remainingLength );
 
     xIncomingPacket.pRemainingData = xBuffer.pBuffer;
-    ( void ) memset( &xConnectProperties, 0x00, sizeof( xConnectProperties ) );
-    xResult = MQTT_DeserializeAck( &xIncomingPacket,
-                                   &usPacketId,
-                                   NULL,
-                                   NULL,
-                                   &xConnectProperties );
+    ( void ) memset( &xConnectionProperties, 0x00, sizeof( xConnectionProperties ) );
+    xResult = MQTT_DeserializeConnAck( &xIncomingPacket,
+                                       &xSessionPresent,
+                                       NULL,
+                                       &xConnectionProperties );
 
     /* Log this convenient demo information before asserting if the result is
      * successful. */
@@ -1366,7 +1370,7 @@ static void prvMQTTProcessIncomingPacket( Socket_t xMQTTSocket )
              * packet. Session present is only valid for a CONNACK. CONNACK is not
              * expected to be received here. Hence pass NULL for pointer to session
              * present. */
-            xResult = MQTT_DeserializeAck( &xIncomingPacket, &usPacketId, NULL, NULL, NULL );
+            xResult = MQTT_DeserializeAck( &xIncomingPacket, &usPacketId, NULL, NULL, &xConnectionProperties );
             configASSERT( xResult == MQTTSuccess );
 
             if( xIncomingPacket.type == MQTT_PACKET_TYPE_SUBACK )
