@@ -817,7 +817,8 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     configASSERT( xStatus == ( BaseType_t ) xIncomingPacket.remainingLength );
 
     xIncomingPacket.pRemainingData = xBuffer.pBuffer;
-    ( void ) memset( &xConnectionProperties, 0x00, sizeof( xConnectionProperties ) );
+    xResult = MQTT_InitConnect( &xConnectionProperties );
+    configASSERT( xResult == MQTTSuccess );
     xResult = MQTT_DeserializeConnAck( &xIncomingPacket,
                                        &xSessionPresent,
                                        NULL,
