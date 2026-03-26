@@ -849,7 +849,7 @@ static bool prvEventCallback( MQTTContext_t * pxMQTTContext,
     if( pxPacketInfo->type == MQTT_PACKET_TYPE_DISCONNECT )
     {
         LogInfo( ( "Server initiated disconnect. Reason code: 0x%02X\r\n",
-                   ( pxDeserializedInfo->pReasonCode != NULL ) ? *( pxDeserializedInfo->pReasonCode ) : 0 ) );
+                   ( pxDeserializedInfo->pReasonCode != NULL ) ? pxDeserializedInfo->pReasonCode->reasonCode[ 0 ] : 0U ) );
     }
     else if( ( pxPacketInfo->type & 0xF0U ) == MQTT_PACKET_TYPE_PUBLISH )
     {
