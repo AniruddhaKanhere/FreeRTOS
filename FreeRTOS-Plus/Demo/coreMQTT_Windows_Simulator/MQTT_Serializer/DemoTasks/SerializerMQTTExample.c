@@ -1318,6 +1318,7 @@ static void prvMQTTProcessIncomingPacket( Socket_t xMQTTSocket )
     MQTTPublishInfo_t xPublishInfo;
     uint16_t usPacketId;
     NetworkContext_t xNetworkContext;
+    MQTTReasonCodeInfo_t xReasonCodeInfo;
 
     /***
      * For readability, error handling in this function is restricted to the use of
@@ -1368,7 +1369,7 @@ static void prvMQTTProcessIncomingPacket( Socket_t xMQTTSocket )
              * packet. Session present is only valid for a CONNACK. CONNACK is not
              * expected to be received here. Hence pass NULL for pointer to session
              * present. */
-            xResult = MQTT_DeserializeAck( &xIncomingPacket, &usPacketId, NULL, NULL, &xConnectionProperties );
+            xResult = MQTT_DeserializeAck( &xIncomingPacket, &usPacketId, &xReasonCodeInfo, NULL, &xConnectionProperties );
             configASSERT( xResult == MQTTSuccess );
 
             if( xIncomingPacket.type == MQTT_PACKET_TYPE_SUBACK )
