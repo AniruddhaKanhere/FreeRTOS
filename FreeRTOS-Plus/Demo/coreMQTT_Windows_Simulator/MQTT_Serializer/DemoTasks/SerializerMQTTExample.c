@@ -874,8 +874,7 @@ static void prvMQTTSubscribeToTopic( Socket_t xMQTTSocket )
                                            sizeof( xMQTTSubscription ) / sizeof( MQTTSubscribeInfo_t ),
                                            &xSubProps,
                                            &xRemainingLength,
-                                           &xPacketSize,
-                                           0U );
+                                           &xPacketSize, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE );
 
     /* Make sure the packet size is less than static buffer size. */
     configASSERT( xResult == MQTTSuccess );
@@ -1074,8 +1073,7 @@ static void prvMQTTPublishToTopic( Socket_t xMQTTSocket )
     xResult = MQTT_GetPublishPacketSize( &xMQTTPublishInfo,
                                          &xPubProps,
                                          &xRemainingLength,
-                                         &xPacketSize,
-                                         0U );
+                                         &xPacketSize, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE );
     configASSERT( xResult == MQTTSuccess );
 
     /* Make sure the packet size is less than static buffer size. */
@@ -1144,8 +1142,7 @@ static void prvMQTTUnsubscribeFromTopic( Socket_t xMQTTSocket )
                                              sizeof( xMQTTSubscription ) / sizeof( MQTTSubscribeInfo_t ),
                                              &xUnsubProps,
                                              &xRemainingLength,
-                                             &xPacketSize,
-                                             0U );
+                                             &xPacketSize, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE );
     configASSERT( xResult == MQTTSuccess );
     /* Make sure the packet size is less than static buffer size */
     configASSERT( xPacketSize < mqttexampleSHARED_BUFFER_SIZE );
@@ -1358,7 +1355,7 @@ static void prvMQTTProcessIncomingPacket( Socket_t xMQTTSocket )
         /* Check if the incoming packet is a publish packet. */
         if( ( xIncomingPacket.type & 0xf0 ) == MQTT_PACKET_TYPE_PUBLISH )
         {
-            xResult = MQTT_DeserializePublish( &xIncomingPacket, &usPacketId, &xPublishInfo, NULL, 0U, 0U );
+            xResult = MQTT_DeserializePublish( &xIncomingPacket, &usPacketId, &xPublishInfo, NULL, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE, 0U );
             configASSERT( xResult == MQTTSuccess );
 
             /* Process incoming Publish message. */
