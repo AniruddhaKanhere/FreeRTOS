@@ -1212,7 +1212,7 @@ static void prvMQTTDisconnect( Socket_t xMQTTSocket )
     xResult = MQTT_GetDisconnectPacketSize( &xDisconnectProps,
                                             &xRemainingLength,
                                             &xPacketSize,
-                                            0U,
+                                            ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE,
                                             &xReasonCode );
     configASSERT( xResult == MQTTSuccess );
     configASSERT( xPacketSize <= mqttexampleSHARED_BUFFER_SIZE );
