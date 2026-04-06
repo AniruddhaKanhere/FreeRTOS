@@ -192,7 +192,7 @@
  * @brief Timeout for receiving CONNACK after sending an MQTT CONNECT packet.
  * Defined in milliseconds.
  */
-#define mqttexampleCONNACK_RECV_TIMEOUT_MS                ( 10000U )
+#define mqttexampleCONNACK_RECV_TIMEOUT_MS           ( 10000U )
 
 /**
  * @brief The maximum number of retries for network operation with server.

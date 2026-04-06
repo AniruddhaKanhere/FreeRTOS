@@ -599,7 +599,7 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
     MQTTPropertyBuilder_Init( &xConnectProps, ucConnectPropsBuf, sizeof( ucConnectPropsBuf ) );
     MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
-    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
 
     xResult = MQTT_Connect( pxMQTTContext,
                             &xConnectInfo,

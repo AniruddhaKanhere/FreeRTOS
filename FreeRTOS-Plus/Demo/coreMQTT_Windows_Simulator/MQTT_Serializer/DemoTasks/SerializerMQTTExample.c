@@ -754,12 +754,12 @@ static void prvCreateMQTTConnectionWithBroker( Socket_t xMQTTSocket )
     configASSERT( xResult == MQTTSuccess );
 
     /* Set session expiry interval to 3600 seconds. */
-    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Set receive maximum to 10. */
-    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
-    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) mqttexampleSHARED_BUFFER_SIZE, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Get size requirement for the connect packet.
@@ -867,7 +867,7 @@ static void prvMQTTSubscribeToTopic( Socket_t xMQTTSocket )
     configASSERT( xResult == MQTTSuccess );
 
     /* Add subscription identifier. */
-    xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_SUBSCRIBE } );
+    xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_SUBSCRIBE } );
     configASSERT( xResult == MQTTSuccess );
 
     xResult = MQTT_GetSubscribePacketSize( xMQTTSubscription,
@@ -1054,11 +1054,11 @@ static void prvMQTTPublishToTopic( Socket_t xMQTTSocket )
     configASSERT( xResult == MQTTSuccess );
 
     /* Set payload format indicator to UTF-8. */
-    xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+    xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Set message expiry interval to 300 seconds. */
-    xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+    xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Add a user property. */
@@ -1066,7 +1066,7 @@ static void prvMQTTPublishToTopic( Socket_t xMQTTSocket )
     xUserProp.keyLength = 4U;
     xUserProp.pValue = "serializer";
     xUserProp.valueLength = 10U;
-    xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+    xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Find out length of Publish packet size. */
@@ -1135,7 +1135,7 @@ static void prvMQTTUnsubscribeFromTopic( Socket_t xMQTTSocket )
     xUserProp.keyLength = 6U;
     xUserProp.pValue = "demo-complete";
     xUserProp.valueLength = 13U;
-    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_DISCONNECT } );
+    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_DISCONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     xResult = MQTT_GetUnsubscribePacketSize( xMQTTSubscription,
@@ -1205,7 +1205,7 @@ static void prvMQTTDisconnect( Socket_t xMQTTSocket )
     configASSERT( xResult == MQTTSuccess );
 
     /* Add reason string for disconnect. */
-    xResult = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", 17U, &( uint8_t ){ MQTT_PACKET_TYPE_DISCONNECT } );
+    xResult = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", 17U, &( uint8_t ) { MQTT_PACKET_TYPE_DISCONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Calculate DISCONNECT packet size. */

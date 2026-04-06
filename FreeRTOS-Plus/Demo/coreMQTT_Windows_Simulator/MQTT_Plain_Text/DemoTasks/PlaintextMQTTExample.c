@@ -570,7 +570,7 @@ static void prvMQTTDemoTask( void * pvParameters )
 
             xMQTTStatus = MQTTPropertyBuilder_Init( &xDisconnectProps, ucDisconnectPropsBuf, sizeof( ucDisconnectPropsBuf ) );
             configASSERT( xMQTTStatus == MQTTSuccess );
-            xMQTTStatus = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", strlen( "Normal disconnect" ), &( uint8_t ){ MQTT_PACKET_TYPE_DISCONNECT } );
+            xMQTTStatus = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", strlen( "Normal disconnect" ), &( uint8_t ) { MQTT_PACKET_TYPE_DISCONNECT } );
             configASSERT( xMQTTStatus == MQTTSuccess );
 
             xMQTTStatus = MQTT_Disconnect( &xMQTTContext, &xDisconnectProps, &xReasonCode );
@@ -710,10 +710,10 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
      * is passed as NULL. */
     xResult = MQTTPropertyBuilder_Init( &xConnectProps, ucConnectPropsBuf, sizeof( ucConnectPropsBuf ) );
     configASSERT( xResult == MQTTSuccess );
-    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
-    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
-    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     xResult = MQTT_Connect( pxMQTTContext,
@@ -796,7 +796,7 @@ static void prvMQTTSubscribeWithBackoffRetries( MQTTContext_t * pxMQTTContext )
          * messages received from the broker will have QOS2. */
         xResult = MQTTPropertyBuilder_Init( &xSubProps, ucSubPropsBuf, sizeof( ucSubPropsBuf ) );
         configASSERT( xResult == MQTTSuccess );
-        xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_SUBSCRIBE } );
+        xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_SUBSCRIBE } );
         configASSERT( xResult == MQTTSuccess );
 
         xResult = MQTT_Subscribe( pxMQTTContext,
@@ -883,16 +883,16 @@ static void prvMQTTPublishToTopics( MQTTContext_t * pxMQTTContext )
         /* Re-initialize the property builder for each publish. */
         xResult = MQTTPropertyBuilder_Init( &xPubProps, ucPubPropsBuf, sizeof( ucPubPropsBuf ) );
         configASSERT( xResult == MQTTSuccess );
-        xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
-        xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
 
         xUserProp.pKey = "demo";
         xUserProp.keyLength = strlen( "demo" );
         xUserProp.pValue = "plaintext";
         xUserProp.valueLength = strlen( "plaintext" );
-        xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
 
         /* Some fields are not used by this demo so start with everything at 0. */
@@ -952,7 +952,7 @@ static void prvMQTTUnsubscribeFromTopics( MQTTContext_t * pxMQTTContext )
     xUserProp.keyLength = strlen( "reason" );
     xUserProp.pValue = "demo-complete";
     xUserProp.valueLength = strlen( "demo-complete" );
-    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_UNSUBSCRIBE } );
+    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_UNSUBSCRIBE } );
     configASSERT( xResult == MQTTSuccess );
 
     xResult = MQTT_Unsubscribe( pxMQTTContext,

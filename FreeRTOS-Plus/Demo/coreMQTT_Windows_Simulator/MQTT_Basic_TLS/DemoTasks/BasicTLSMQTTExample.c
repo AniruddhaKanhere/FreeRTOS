@@ -585,7 +585,7 @@ static void prvMQTTDemoTask( void * pvParameters )
             xMQTTStatus = MQTTPropertyBuilder_Init( &xDisconnectProps, ucDisconnectPropsBuf, sizeof( ucDisconnectPropsBuf ) );
             configASSERT( xMQTTStatus == MQTTSuccess );
 
-            xMQTTStatus = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", 17, &( uint8_t ){ MQTT_PACKET_TYPE_DISCONNECT } );
+            xMQTTStatus = MQTTPropAdd_ReasonString( &xDisconnectProps, "Normal disconnect", 17, &( uint8_t ) { MQTT_PACKET_TYPE_DISCONNECT } );
             configASSERT( xMQTTStatus == MQTTSuccess );
 
             xMQTTStatus = MQTT_Disconnect( &xMQTTContext, &xDisconnectProps, &xReasonCode );
@@ -731,12 +731,12 @@ static void prvCreateMQTTConnectionWithBroker( MQTTContext_t * pxMQTTContext,
     configASSERT( xResult == MQTTSuccess );
 
     /* Add session expiry interval of 3600 seconds. */
-    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_SessionExpiry( &xConnectProps, 3600U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Add receive maximum of 10. */
-    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
-    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ){ MQTT_PACKET_TYPE_CONNECT } );
+    xResult = MQTTPropAdd_ReceiveMax( &xConnectProps, 10U, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
+    MQTTPropAdd_MaxPacketSize( &xConnectProps, ( uint32_t ) democonfigNETWORK_BUFFER_SIZE, &( uint8_t ) { MQTT_PACKET_TYPE_CONNECT } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Send MQTT CONNECT packet to broker. LWT is not used in this demo, so it
@@ -809,7 +809,7 @@ static void prvMQTTSubscribeWithBackoffRetries( MQTTContext_t * pxMQTTContext )
     configASSERT( xResult == MQTTSuccess );
 
     /* Add subscription identifier. */
-    xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_SUBSCRIBE } );
+    xResult = MQTTPropAdd_SubscriptionId( &xSubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_SUBSCRIBE } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Initialize context for backoff retry attempts if SUBSCRIBE request fails. */
@@ -924,11 +924,11 @@ static void prvMQTTPublishToTopics( MQTTContext_t * pxMQTTContext )
         configASSERT( xResult == MQTTSuccess );
 
         /* Add payload format indicator (1 = UTF-8). */
-        xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_PayloadFormat( &xPubProps, 1U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
 
         /* Add message expiry of 300 seconds. */
-        xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_MessageExpiry( &xPubProps, 300U, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
 
         /* Add a user property. */
@@ -936,7 +936,7 @@ static void prvMQTTPublishToTopics( MQTTContext_t * pxMQTTContext )
         xUserProp.keyLength = 4;
         xUserProp.pValue = "basic-tls";
         xUserProp.valueLength = 9;
-        xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_PUBLISH } );
+        xResult = MQTTPropAdd_UserProp( &xPubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_PUBLISH } );
         configASSERT( xResult == MQTTSuccess );
 
         /* Get a unique packet id. */
@@ -986,7 +986,7 @@ static void prvMQTTUnsubscribeFromTopics( MQTTContext_t * pxMQTTContext )
     xUserProp.keyLength = 6;
     xUserProp.pValue = "demo-complete";
     xUserProp.valueLength = 13;
-    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ){ MQTT_PACKET_TYPE_UNSUBSCRIBE } );
+    xResult = MQTTPropAdd_UserProp( &xUnsubProps, &xUserProp, &( uint8_t ) { MQTT_PACKET_TYPE_UNSUBSCRIBE } );
     configASSERT( xResult == MQTTSuccess );
 
     /* Send UNSUBSCRIBE packet. */
