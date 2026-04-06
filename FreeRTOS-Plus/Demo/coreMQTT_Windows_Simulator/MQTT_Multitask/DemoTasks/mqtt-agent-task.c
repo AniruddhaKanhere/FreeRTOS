@@ -529,7 +529,9 @@ static MQTTStatus_t prvMQTTInit( void )
                               prvGetTimeMs,
                               prvIncomingPublishCallback,
                               /* Context to pass into the callback. Passing the pointer to subscription array. */
-                              xGlobalSubscriptionList );
+                              xGlobalSubscriptionList,
+                              NULL,
+                              0U );
 
     return xReturn;
 }
@@ -555,7 +557,7 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
      * the MQTT broker. In a production device the identifier can be something
      * unique, such as a device serial number. */
     xConnectInfo.pClientIdentifier = democonfigCLIENT_IDENTIFIER;
-    xConnectInfo.clientIdentifierLength = ( uint16_t ) strlen( democonfigCLIENT_IDENTIFIER );
+    xConnectInfo.clientIdentifierLength = strlen( democonfigCLIENT_IDENTIFIER );
 
     /* Set MQTT keep-alive period. It is the responsibility of the application
      * to ensure that the interval between Control Packets being sent does not
@@ -567,11 +569,11 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
     #if defined( democonfigUSE_AWS_IOT_CORE_BROKER ) && defined( democonfigCLIENT_USERNAME )
         /* Append metrics string when connecting to AWS IoT Core with custom auth */
         xConnectInfo.pUserName = democonfigCLIENT_USERNAME AWS_IOT_METRICS_STRING;
-        xConnectInfo.userNameLength = ( uint16_t ) strlen( democonfigCLIENT_USERNAME AWS_IOT_METRICS_STRING );
+        xConnectInfo.userNameLength = strlen( democonfigCLIENT_USERNAME AWS_IOT_METRICS_STRING );
     #elif defined( democonfigUSE_AWS_IOT_CORE_BROKER )
         /* If no username is needed, only send the metrics string */
         xConnectInfo.pUserName = AWS_IOT_METRICS_STRING;
-        xConnectInfo.userNameLength = ( uint16_t ) strlen( AWS_IOT_METRICS_STRING );
+        xConnectInfo.userNameLength = strlen( AWS_IOT_METRICS_STRING );
 
         /* Password for authentication is not used. */
         xConnectInfo.pPassword = NULL;
@@ -579,7 +581,7 @@ static MQTTStatus_t prvMQTTConnect( bool xCleanSession )
     #elif defined( democonfigCLIENT_USERNAME )
         /* If not connecting to AWS IoT Core, send the username without modification. */
         xConnectInfo.pUserName = democonfigCLIENT_USERNAME;
-        xConnectInfo.userNameLength = ( uint16_t ) strlen( democonfigCLIENT_USERNAME );
+        xConnectInfo.userNameLength = strlen( democonfigCLIENT_USERNAME );
     #endif /* defined( democonfigCLIENT_USERNAME ) */
 
     /* Send MQTT CONNECT packet to broker. MQTT's Last Will and Testament feature
@@ -697,7 +699,7 @@ static void prvSubscriptionCommandCallback( void * pxCommandContext,
                 /* Remove subscription callback for unsubscribe. */
                 removeSubscription( xGlobalSubscriptionList,
                                     pxSubscribeArgs->pSubscribeInfo[ lIndex ].pTopicFilter,
-                                    pxSubscribeArgs->pSubscribeInfo[ lIndex ].topicFilterLength );
+                                    ( uint16_t ) pxSubscribeArgs->pSubscribeInfo[ lIndex ].topicFilterLength );
             }
         }
 
