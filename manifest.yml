@@ -40,7 +40,7 @@ dependencies:
       path: "FreeRTOS-Plus/Source/Application-Protocols/coreHTTP"
 
   - name: "coreMQTT"
-    version: "86a5750"
+    version: "76e9d89"
     repository:
       type: "git"
       url: "https://github.com/FreeRTOS/coreMQTT.git"
